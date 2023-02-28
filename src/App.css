@@ -1,0 +1,17 @@
+#createVaultInput {
+  line-height: 35px;
+}
+
+#createVaultInput::placeholder {
+  color: #fff;
+  opacity: 1; /* Firefox */
+  line-height: 35px;
+}
+
+#createVaultInput {
+  outline: none;
+}
+
+input:focus::-webkit-input-placeholder {
+  opacity: 0;
+}
