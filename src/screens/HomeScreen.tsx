@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import { ShadowFile } from '@shadow-drive/sdk';
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useContext, useRef, useState } from 'react';
 import { Text, StyleSheet, TouchableOpacity, View, Image } from 'react-native';
@@ -66,7 +65,7 @@ export function HomeScreen() {
               onPress={async () => {
                 onClose();
                 // @ts-ignore
-                const { type, uri } = await DocumentPicker.getDocumentAsync({
+                const { type, uri, name, mimeType } = await DocumentPicker.getDocumentAsync({
                   copyToCacheDirectory: false,
                   type: '*/*',
                 });
@@ -77,9 +76,8 @@ export function HomeScreen() {
 
                 const res = await fetch(uri);
 
-                const file = new File([await res.blob()], 'test');
+                const file = new File([await res.blob()], name, { type: mimeType });
 
-                console.log(globalContext);
                 await globalContext.drive?.uploadFile(globalContext.accounts[0].publicKey, file);
               }}
               style={styles.soundtab}>
@@ -120,7 +118,6 @@ const styles = StyleSheet.create({
   soundtabs: {
     backgroundColor: '#322A3D',
     width: '100%',
-    paddingHorizontal: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItem: 'center',
@@ -129,7 +126,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#4B3656',
     // borderRadius:5
   },
-  soundtabInner: { height: 50, justifyContent: 'center' },
+  soundtabInner: { height: 30, justifyContent: 'center' },
   soundtab: {
     backgroundColor: '#322A3D',
     width: '100%',
