@@ -7234,6 +7234,11 @@ expo-asset@~8.7.0:
     path-browserify "^1.0.0"
     url-parse "^1.5.9"
 
+expo-av@^13.2.1:
+  version "13.2.1"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-13.2.1.tgz#ce502a4c5d4a57962fd9f5f1a40c76c39c88f5ee"
+  integrity sha512-mC0mYSzaOaZgXjzhW2l4Ag325JjH6q5IbptfwD7gkMOFYy7VPOMxEMUnetadbs3DDzmgE6vUWrTjUIUbwq59qg==
+
 expo-constants@~14.0.0, expo-constants@~14.0.2:
   version "14.0.2"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-14.0.2.tgz#2cb1dec8f41a64c2fc5b4eecaf77d7661cad01cc"
@@ -7322,6 +7327,13 @@ expo-status-bar@~1.4.2:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.4.2.tgz#14f2b9a6dc7d550578421f07e0046f5fafc2b403"
   integrity sha512-ZWjO6D4ARGYfAd3SWDD3STNudHDhyBZDZjhhseqoEmsf7bS9ykny8KKOhlzJW24qIQNPhkgdvHhaw9fQwMJy3Q==
+
+expo-video-player@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/expo-video-player/-/expo-video-player-2.2.0.tgz#85cf1c8a9e928dde45523ebba7a4e81906b54ee3"
+  integrity sha512-DDai4zmTF265EHOagnWWA22o/xwP4FI1YVUzhTibN5vB3nLqSL9ABBI+H++I9T0p7sCRgQhgoy4whaWWcN4ZfQ==
+  dependencies:
+    tslib "^2.4.0"
 
 expo@~47.0.8:
   version "47.0.13"

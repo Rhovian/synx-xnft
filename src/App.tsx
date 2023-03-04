@@ -24,7 +24,7 @@ const Tab = createBottomTabNavigator();
 function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Vaults"
       screenOptions={{
         tabBarShowLabel: false,
         tabBarActiveTintColor: '#804694',
@@ -46,7 +46,7 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="List"
+        name="Vaults"
         component={TokenListNavigator}
         options={{
           headerShown: false,

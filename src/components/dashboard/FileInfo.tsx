@@ -1,73 +1,76 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { Colors, BOLD } from '../../constants';
+import { Colors, BOLD, MEDIUM, REGULAR } from '../../constants';
 
 // @ts-ignore
 export const FileButton = ({ fileInfo, onPress, style }) => {
   return (
-    <TouchableOpacity onPress={onPress}>
-      <View style={styles.soundtabs}>
-        <View style={styles.soundtabInner}>
-          <Text allowFontScaling={false} style={styles.soundtabText}>
-            Create New Vault
+    <TouchableOpacity style={style} onPress={onPress}>
+      <View
+        style={{
+          width: '100%',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+        }}>
+        {fileInfo.icon}
+        <div style={styles.infoContainer}>
+          <Text style={styles.name}>{fileInfo.name.slice(0, 16)}...</Text>
+        </div>
+        <TouchableOpacity
+          style={styles.immutableButton}
+          onPress={() => console.log('go to file viewer')}>
+          <Text style={{ fontSize: 12, color: Colors.dark.text, fontFamily: MEDIUM }}>
+            {fileInfo.size}
           </Text>
-        </View>
-        <View style={{ height: 50, justifyContent: 'center' }}>
-          <Image style={styles.sheetImage} source={require('../../assets/create_vault.png')} />
-        </View>
+        </TouchableOpacity>
       </View>
+      ;
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
     backgroundColor: Colors.dark.background,
-    alignItems: 'center',
   },
-  titleBalancesWrap: {
+  image: {
+    width: 38,
+    height: 38,
+    borderRadius: 22,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.dark.text,
+    fontFamily: MEDIUM,
+  },
+  price: {
+    fontSize: 18,
+  },
+  infoContainer: {
     display: 'flex',
     flexDirection: 'column',
-    width: '100%',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 25,
+    flexGrow: 0.5,
   },
-  soundtabs: {
-    backgroundColor: '#322A3D',
-    width: '100%',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItem: 'center',
-    // marginVertical:5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#4B3656',
-    borderRadius: 5,
+  subInfo: {
+    fontSize: 10,
+    color: Colors.dark.text,
+    fontFamily: REGULAR,
   },
-  soundtabInner: { height: 50, justifyContent: 'center' },
-  soundtab: {
-    backgroundColor: '#322A3D',
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItem: 'center',
-    // marginVertical:5,
-    // borderRadius:5
-  },
-  soundtabText: {
-    color: '#fff',
-    fontFamily: BOLD,
+  immutableButton: {
     fontSize: 12,
-  },
-  sheetImage: { width: 24, height: 24 },
-  spacer: {
+    color: Colors.dark.text,
+    fontFamily: BOLD,
+    flexGrow: 0.75,
     display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    width: '100%',
+    textAlign: 'end',
+    marginRight: 20,
   },
 });

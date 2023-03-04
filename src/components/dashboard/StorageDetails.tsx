@@ -40,14 +40,6 @@ export function StorageDetails() {
       size,
     };
   };
-  const filterAccountFiles = async (account: StorageAccountResponse) => {
-    const files = await globalContext.drive?.listObjects(new PublicKey(account.publicKey));
-    if (files?.keys.length) {
-      if (files.keys.length > 0) {
-        return files;
-      }
-    }
-  };
 
   const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {
     const accountKey = account.publicKey.toString();
@@ -69,18 +61,62 @@ export function StorageDetails() {
   useEffect(() => {
     // iterate through all accounts, and generate the dashboard data for all files in each account
     (async () => {
-      setAccountsLength(globalContext.accounts.length);
-      globalContext.accounts.forEach(async (account) => {
-        const files = await filterAccountFiles(account);
-        if (files) {
-          getAccountFiles(account, files);
-        }
+      setAccountFiles({
+        account1: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
+        account2: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
+        account3: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
+        account6: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
+        account5: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
+        account9: [
+          {
+            fileType: 'pdf',
+            icon: undefined,
+            name: 'file1.pdf',
+            size: '25 MB',
+          },
+        ],
       });
     })();
   }, [globalContext.accounts]);
 
   return (
     <div style={styles.filesContainer}>
+      <div style={{ width: '100%', height: 200 }}>hello</div>
       {Object.entries(accountFiles).map(([accountKey, files]) => (
         <FileButtonContainer key={accountKey} files={files} />
       ))}
@@ -91,5 +127,6 @@ export function StorageDetails() {
 const styles = StyleSheet.create({
   filesContainer: {
     width: '100%',
+    paddingHorizontal: 16,
   },
 });

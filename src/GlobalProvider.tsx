@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import {
   ShdwDrive,
   StorageAccountResponse,
@@ -6,6 +7,7 @@ import {
   ShadowBatchUploadResponse,
   StorageAccountInfo,
   ShadowFile,
+  ListObjectsResponse,
 } from '@shadow-drive/sdk';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
@@ -19,12 +21,14 @@ export interface GlobalProvider {
   wallet: PublicKey;
   solBalance: number;
   shdwBalance: number;
+  loading: boolean;
   shdwTokenAccount: PublicKey | undefined;
   drive: ShdwDrive | undefined;
   accounts: StorageAccountResponse[];
   currentAccount: StorageAccountResponse | undefined;
   currentAccountInfo: any;
   currentAccountFiles: any[];
+  accountFiles: Record<string, any[]>;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(arg0: StorageAccountResponse): Promise<void>;
@@ -55,6 +59,8 @@ export function GlobalProvider(props: any) {
   const [currentAccount, setCurrentAccount] = useState<StorageAccountResponse>();
   const [currentAccountInfo, setCurrentAccountInfo] = useState<StorageAccountInfo>();
   const [currentAccountFiles, setCurrentAccountFiles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [accountFiles, setAccountFiles] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     (async () => {
@@ -87,11 +93,14 @@ export function GlobalProvider(props: any) {
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     refreshAccounts().catch((err) => console.log(err.toString()));
+    setLoading(false);
+    console.log(loading);
   }, [drive]);
 
   useEffect(() => {
-    if (!currentAccount && accounts?.length) selectAccount(accounts[0]);
+    if (!currentAccount && accounts?.length) selectAccount(accounts[0].publicKey);
   }, [accounts]);
 
   useEffect(() => {
@@ -110,6 +119,88 @@ export function GlobalProvider(props: any) {
     setShdwBalance((await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!);
   }
 
+  function humanFileSize(bytes: number, si = false, dp = 1) {
+    const thresh = si ? 1000 : 1024;
+
+    if (Math.abs(bytes) < thresh) {
+      return bytes + ' B';
+    }
+
+    const units = si
+      ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+      : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    let u = -1;
+    const r = 10 ** dp;
+
+    do {
+      bytes /= thresh;
+      ++u;
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+    return bytes.toFixed(dp) + ' ' + units[u];
+  }
+
+  const getAccountFileInfo = (res: Response, name: string) => {
+    const mimeType = res.headers.get('Content-Type');
+    const size = res.headers.get('Content-Length');
+
+    let fileType;
+    let icon;
+
+    if (mimeType?.includes('image')) {
+      fileType = 'image';
+      icon = <MaterialCommunityIcons name="image" size={38} color="yellow" />;
+    } else if (mimeType?.includes('video')) {
+      fileType = 'video';
+      icon = <MaterialCommunityIcons name="video" size={38} color="green" />;
+    } else if (mimeType?.includes('audio')) {
+      fileType = 'audio';
+      icon = <MaterialCommunityIcons name="cast-audio-variant" size={38} color="white" />;
+    } else if (mimeType?.includes('text')) {
+      fileType = 'text';
+      icon = <MaterialCommunityIcons name="file-document" size={38} color="blue" />;
+    } else if (mimeType?.includes('application')) {
+      if (mimeType?.includes('octet')) {
+        icon = <AntDesign name="questioncircleo" size={38} color="red" />;
+        fileType = 'unknown';
+      } else {
+        fileType = 'application';
+        icon = <MaterialCommunityIcons name="application-cog" size={38} color="orange" />;
+      }
+    } else {
+      icon = <AntDesign name="questioncircleo" size={38} color="red" />;
+      fileType = 'unknown';
+    }
+
+    const hrsize = humanFileSize(parseInt(size!, 10));
+    const body = res.url;
+
+    return {
+      fileType,
+      icon,
+      name,
+      size: hrsize,
+      body,
+    };
+  };
+
+  const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {
+    const accountKey = account.publicKey.toString();
+    const accountFilesArray = await Promise.all(
+      files.keys.map(async (file) => {
+        const res = await fetch(
+          `https://shdw-drive.genesysgo.net/` + account.publicKey + '/' + file
+        );
+
+        return getAccountFileInfo(res, file);
+      })
+    );
+    setAccountFiles((prevAccountFiles) => ({
+      ...prevAccountFiles,
+      [accountKey]: accountFilesArray,
+    }));
+  };
+
   async function refreshAccounts() {
     return new Promise<StorageAccountResponse[]>(async (resolve, reject) => {
       if (!drive) {
@@ -121,10 +212,20 @@ export function GlobalProvider(props: any) {
         const accts = await drive.getStorageAccounts('v2').catch((err) => reject(err));
 
         if (accts) {
+          const filteredAccounts: StorageAccountResponse[] = [];
+          // check if the account has files
+          for await (const acct of accts) {
+            // get fliles
+            const files = await drive.listObjects(new PublicKey(acct.publicKey));
+            if (files.keys.length > 0) {
+              filteredAccounts.push(acct);
+              getAccountFiles(acct, files);
+            }
+          }
           setAccounts(
-            accts.sort((a, b) =>
+            filteredAccounts.sort((a, b) =>
               a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
-            ) 
+            )
           );
           resolve(accts);
         }
@@ -134,8 +235,8 @@ export function GlobalProvider(props: any) {
     });
   }
 
-  async function selectAccount(account: StorageAccountResponse) {
-    setCurrentAccount(account);
+  async function selectAccount(account: PublicKey) {
+    setCurrentAccount(accounts[accounts.map((a) => a.publicKey).indexOf(account)]);
   }
 
   async function refreshCurrentAccountInfo() {
@@ -219,7 +320,7 @@ export function GlobalProvider(props: any) {
         const foundAccount = refreshedAccounts.find(
           (a) => a.publicKey.toString() === newAcct.shdw_bucket
         );
-        if (foundAccount) selectAccount(foundAccount);
+        if (foundAccount) selectAccount(foundAccount.publicKey);
       } catch (e) {
         console.log(e);
       }
@@ -438,6 +539,8 @@ export function GlobalProvider(props: any) {
         shdwBalance,
         shdwTokenAccount,
         drive,
+        accountFiles,
+        loading,
         accounts,
         currentAccount,
         currentAccountInfo,

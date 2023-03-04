@@ -1,40 +1,40 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Dimensions } from 'react-native';
+import { View, FlatList, StyleSheet, ScrollView } from 'react-native';
 
 import { FileButton } from './FileInfo';
-
-const numColumns = 2;
-const width = Dimensions.get('window').width;
-const itemWidth = width / numColumns;
-
 // @ts-ignore
 export const FileButtonContainer = ({ files }) => {
   return (
-    <FlatList
-      data={files}
-      keyExtractor={(file) => file.name}
-      renderItem={({ item }) => (
-        <FileButton
-          fileInfo={item}
-          onPress={() => {
-            console.log('hello world');
-          }}
-        />
-      )}
-      contentContainerStyle={styles.listContentContainer}
-      numColumns={numColumns}
-      showsVerticalScrollIndicator={false}
-    />
+    <ScrollView>
+      <FlatList
+        data={files}
+        keyExtractor={(file) => file.name}
+        renderItem={({ item }) => (
+          <FileButton
+            fileInfo={item}
+            onPress={() => {
+              console.log('hello world');
+            }}
+            style={styles.item} // add this line
+          />
+        )}
+        contentContainerStyle={styles.listContentContainer}
+      />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   listContentContainer: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
     paddingTop: 16,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   item: {
-    width: itemWidth,
+    width: '100%',
   },
 });
 

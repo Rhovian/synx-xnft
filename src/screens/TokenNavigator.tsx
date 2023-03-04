@@ -1,114 +1,234 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createStackNavigator, StackCardStyleInterpolator } from '@react-navigation/stack';
-import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, ActivityIndicator, Animated } from 'react-native';
-import tw from 'twrnc';
+import { StorageAccountResponse } from '@shadow-drive/sdk';
+import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
+import VideoPlayer from 'expo-video-player';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Button,
+} from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
 
+import { GlobalContext } from '../GlobalProvider';
+import { ActionMenu } from '../components/ActionMenu';
 import { Screen } from '../components/Screen';
 import { TokenRow } from '../components/TokenRow';
+import { AudioFile } from '../components/dashboard/AudioFile';
+import { Balance } from '../components/dashboard/Balance';
+import { FileButton } from '../components/dashboard/FileInfo';
+import { BOLD, Colors } from '../constants';
 
 type RootStackParamList = {
   List: object;
-  Detail: { id: string };
+  Detail: { id: string; navigation: any };
+  FileViewer: {
+    fileType: any;
+    body: any;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 function FullScreenLoadingIndicator() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <ActivityIndicator />
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.dark.background,
+      }}>
+      <ActivityIndicator color="#eee" />
     </View>
   );
 }
 
-async function fetchTokenData(count = 20) {
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${count}&page=1&sparkline=true&price_change_percentage=24h`;
-  return fetch(url).then((r) => r.json());
-}
-
-function useTokenData() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any[]>([]);
-
-  useEffect(() => {
-    async function fetch() {
-      setLoading(true);
-      const data = await fetchTokenData();
-      console.log('data', data);
-      setData(data);
-      setLoading(false);
-    }
-
-    fetch();
-  }, []);
-
-  return { data, loading };
+function transformStorageAccounts(accounts: StorageAccountResponse[]) {
+  return accounts.map((account) => {
+    return {
+      id: account.publicKey,
+      name: account.account.identifier,
+      imageUrl: require('../assets/create_vault.png'),
+      createdAt: account.account.creationTime,
+      isImmutable: account.account.immutable,
+    };
+  });
 }
 
 function List({ navigation }: NativeStackScreenProps<RootStackParamList, 'List'>) {
-  const { data, loading } = useTokenData();
+  const globalContext = useContext(GlobalContext);
+  const [data, setData] = useState(transformStorageAccounts(globalContext.accounts));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setData(transformStorageAccounts(globalContext.accounts));
+  }, [globalContext.accounts]);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [data]);
 
   const handlePressTokenRow = (id: string) => {
-    navigation.push('Detail', { id });
+    globalContext.selectAccount(id)
+    navigation.push('Detail', { id, navigation });
   };
 
-  if (loading) {
+  if (globalContext.loading) {
     return <FullScreenLoadingIndicator />;
   }
 
   const ItemSeparatorComponent = () => (
-    <View style={{ marginVertical: 8, borderColor: '#eee', borderBottomWidth: 1 }} />
+    <View
+      style={{ marginVertical: 8, borderColor: Colors.dark.inputBackground, borderBottomWidth: 1 }}
+    />
   );
 
   return (
-    <Screen>
-      <FlatList
-        style={{ flex: 1 }}
-        data={data}
-        keyExtractor={(item) => item.id}
-        ItemSeparatorComponent={ItemSeparatorComponent}
-        renderItem={({ item }) => {
-          return (
-            <TokenRow
-              id={item.id}
-              name={item.name}
-              price={item.current_price}
-              imageUrl={item.image}
-              onPress={handlePressTokenRow}
-            />
-          );
-        }}
-      />
+    <Screen style={{ backgroundColor: Colors.dark.background, paddingHorizontal: 0 }}>
+      <div style={styles.titleBalancesWrap}>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontSize: RFValue(21),
+            color: Colors['dark'].text,
+            fontFamily: BOLD,
+            textAlign: 'center',
+          }}>
+          Vaults Dashboard
+        </Text>
+        <Balance />
+      </div>
+      {loading ? (
+        <FullScreenLoadingIndicator />
+      ) : (
+        <FlatList
+          style={{
+            flex: 1,
+            backgroundColor: Colors.dark.background,
+            paddingTop: 35,
+            paddingHorizontal: 20,
+          }}
+          data={data}
+          keyExtractor={(item) => item.id.toString()}
+          ItemSeparatorComponent={ItemSeparatorComponent}
+          renderItem={({ item }) => {
+            return (
+              <TokenRow
+                id={item.id.toString()}
+                name={item.name}
+                imageUrl={item.imageUrl}
+                createdAt={item.createdAt}
+                isImmutable={item.isImmutable}
+                onPress={handlePressTokenRow}
+              />
+            );
+          }}
+        />
+      )}
+      <ActionMenu />
     </Screen>
   );
 }
 
-function Detail({ route }: NativeStackScreenProps<RootStackParamList, 'Detail'>) {
-  const { data, loading } = useTokenData();
+function Detail({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'Detail'>) {
+  const globalContext = useContext(GlobalContext);
   const { id } = route.params;
+  const [data, setData] = useState(globalContext.accountFiles[id]);
+  console.log(globalContext.accountFiles[id]);
 
-  if (loading) {
-    return <FullScreenLoadingIndicator />;
-  }
+  useEffect(() => {
+    setData(globalContext.accountFiles[id]);
+  }, [globalContext.accountFiles]);
 
-  const item = data.find((d) => d.id === id);
+  const ItemSeparatorComponent = () => (
+    <View
+      style={{ marginVertical: 8, borderColor: Colors.dark.inputBackground, borderBottomWidth: 1 }}
+    />
+  );
 
-  if (!item) {
-    return null;
-  }
+  const handlePressTokenRow = (item: any) => {
+    navigation.push('FileViewer', { fileType: item.fileType, body: item.body });
+  };
 
   return (
-    <Screen>
-      <View style={tw`bg-yellow-100 items-center justify-center p-4`}>
-        <Image source={{ uri: item.image }} style={tw`w-8 h-8 rounded m-4`} />
-        <Text style={tw`font-bold text-lg`}>{item.name}</Text>
-        <Text style={tw`font-bold text-lg`}>Symbol: {item.symbol}</Text>
-        <Text style={tw`font-bold text-lg`}>Total supply: {item.total_supply}</Text>
-        <Text style={tw`font-bold text-lg`}>All time high: {item.ath}</Text>
-      </View>
+    <Screen style={{ backgroundColor: Colors.dark.background }}>
+      <FlatList
+        style={{ flex: 1, backgroundColor: Colors.dark.background, paddingTop: 35 }}
+        data={data}
+        keyExtractor={(item) => item.name}
+        ItemSeparatorComponent={ItemSeparatorComponent}
+        renderItem={({ item }) => {
+          return (
+            <FileButton
+              fileInfo={item}
+              onPress={() => handlePressTokenRow(item)}
+              style={styles.item} // add this line
+            />
+          );
+        }}
+      />
+      <ActionMenu />
     </Screen>
   );
+}
+
+function FileViewer({ route }: NativeStackScreenProps<RootStackParamList, 'FileViewer'>) {
+  const { fileType, body } = route.params;
+  const video = React.useRef<Video>(null);
+  // @ts-ignore
+  const [status, setStatus] = React.useState<AVPlaybackStatus>({});
+
+  if (fileType === 'image') {
+    return (
+      <View style={{ flex: 1 }}>
+        <Image
+          style={{ flex: 1, backgroundColor: Colors.dark.background }}
+          source={{ uri: body }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  } else if (fileType === 'video') {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
+        <VideoPlayer
+          videoProps={{
+            shouldPlay: true,
+            resizeMode: ResizeMode.CONTAIN,
+            source: {
+              uri: body,
+            },
+          }}
+        />
+      </View>
+    );
+  } else if (fileType === 'audio') {
+    return <AudioFile uri={body} />;
+  } else if (fileType === 'text') {
+    return (
+      <View style={{ flex: 1, padding: 10 }}>
+        <Text>{body}</Text>
+      </View>
+    );
+  } else {
+    return (
+      <View style={{ flex: 1, padding: 10 }}>
+        <Text>File type not supported</Text>
+        <Text>{body}</Text>
+      </View>
+    );
+  }
 }
 
 const forSlide: StackCardStyleInterpolator = ({ current, next, inverted, layouts: { screen } }) => {
@@ -156,8 +276,63 @@ export const TokenListNavigator = () => {
         animationEnabled: true,
         cardStyleInterpolator: forSlide,
       }}>
-      <Stack.Screen name="List" component={List} options={{ title: 'Token List' }} />
-      <Stack.Screen name="Detail" component={Detail} options={{ title: 'Token Detail' }} />
+      <Stack.Screen
+        name="List"
+        component={List}
+        options={{
+          title: 'Vaults',
+          headerStyle: {
+            backgroundColor: Colors.dark.background,
+          },
+          headerTitleStyle: {
+            color: Colors.dark.text,
+            fontFamily: BOLD,
+          },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Detail"
+        component={Detail}
+        options={{
+          title: 'Vault Files',
+          headerStyle: {
+            backgroundColor: Colors.dark.background,
+          },
+          headerTitleStyle: {
+            color: Colors.dark.text,
+            fontFamily: BOLD,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="FileViewer"
+        component={FileViewer}
+        options={{
+          title: 'File Viewer',
+          headerStyle: {
+            backgroundColor: Colors.dark.background,
+          },
+          headerTitleStyle: {
+            color: Colors.dark.text,
+            fontFamily: BOLD,
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  titleBalancesWrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 50,
+  },
+  item: {
+    width: '100%',
+  },
+});
