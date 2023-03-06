@@ -1,0 +1,22 @@
+{
+  "name": "Synx Test",
+  "version": "0.0.1",
+  "description": "Synx pilot app",
+  "website": "https://twitter.com/synx_xyz",
+  "kind": "app",
+  "icon": {
+    "md": "./assets/vault.png"
+  },
+  "supply": 1,
+  "price": 0,
+  "installAuthority": "76ccd7ramuaJmBcCKEkDkREQ1vCJbFuEaFhYGPwYpHs9",
+  "contact": {
+    "repository": "https://github.com/Mjavala/synx-xnft"
+  },
+  "screenshots": ["./assets/vault.png"],
+  "entrypoints": {
+    "default": {
+      "web": "./web-build/index.html"
+    }
+  }
+}

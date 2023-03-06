@@ -1,13 +1,16 @@
 {
-  "name": "xNFT Quickstart",
+  "name": "Synx Test",
   "version": "0.0.1",
-  "description": "React Native Example",
+  "description": "Synx pilot app",
   "website": "http://wao.gg",
   "kind": "app",
   "icon": {
-    "md": "./assets/icon.png"
+    "md": "./assets/vault.png"
   },
-  "screenshots": ["./assets/screenShot.png"],
+  "contact": {
+    "repository": "https://github.com/Mjavala/synx-xnft"
+  },
+  "screenshots": ["./assets/vault.png"],
   "entrypoints": {
     "default": {
       "web": "./web-build/index.html"

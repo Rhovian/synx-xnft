@@ -12,11 +12,6 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import SwitchToggle from 'react-native-switch-toggle';
 
 import { GlobalContext } from '../GlobalProvider';
 import { AlertMessage } from '../components/Alert';
@@ -478,7 +473,7 @@ export function CreateVault({ navigation }) {
                         </Text>
                       </View>
 
-                      <View
+                      {/*<View
                         style={{
                           width: '20%',
                           alignItems: 'center',
@@ -506,6 +501,7 @@ export function CreateVault({ navigation }) {
                           }}
                         />
                       </View>
+                      */}
                     </View>
                   </View>
 
@@ -540,7 +536,7 @@ export function CreateVault({ navigation }) {
                         </Text>
                       </View>
 
-                      <View
+                      {/*<View
                         style={{
                           width: '20%',
                           alignItems: 'center',
@@ -568,6 +564,7 @@ export function CreateVault({ navigation }) {
                           }}
                         />
                       </View>
+                      */}
                     </View>
                   </View>
                 </>
@@ -686,13 +683,13 @@ const styles = StyleSheet.create({
     color: Colors['dark'].text,
     marginVertical: 10,
     fontWeight: 'bold',
-    fontSize: hp('2.2'),
+    fontSize: 2.2,
   },
   label1: {
     color: Colors['dark'].text,
     marginVertical: 0,
     fontWeight: 'bold',
-    fontSize: hp('2.2'),
+    fontSize: '2.2',
   },
   Input: {
     padding: 10,
@@ -702,8 +699,8 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: wp('55%'),
-    height: hp('25%'),
+    width: '55%',
+    height: '25%',
     marginBottom: 8,
   },
   text: {
