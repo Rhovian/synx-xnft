@@ -223,7 +223,7 @@ export function GlobalProvider(props: any) {
             }
           }
           setAccounts(
-            filteredAccounts.sort((a, b) =>
+            accts.sort((a, b) =>
               a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
             )
           );
