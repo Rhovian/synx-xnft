@@ -55,14 +55,6 @@ function TabNavigator() {
           ),
         }}
       />
-      <Tab.Screen
-        name="Examples"
-        component={ExamplesScreens}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Feather name="user" color={color} size={size} />,
-        }}
-      />
     </Tab.Navigator>
   );
 }

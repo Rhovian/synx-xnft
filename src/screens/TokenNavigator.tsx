@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createStackNavigator, StackCardStyleInterpolator } from '@react-navigation/stack';
 import { StorageAccountResponse } from '@shadow-drive/sdk';
-import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
+import { ResizeMode, Video } from 'expo-av';
 import VideoPlayer from 'expo-video-player';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -72,19 +72,15 @@ function List({ navigation }: NativeStackScreenProps<RootStackParamList, 'List'>
   }, [globalContext.accounts]);
 
   useEffect(() => {
-    if (data.length > 0) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, [data]);
+    setLoading(globalContext.loading);
+  }, [globalContext.loading]);
 
   const handlePressTokenRow = (id: string) => {
-    globalContext.selectAccount(id)
+    globalContext.selectAccount(id as any);
     navigation.push('Detail', { id, navigation });
   };
 
-  if (globalContext.loading) {
+  if (loading) {
     return <FullScreenLoadingIndicator />;
   }
 
@@ -109,33 +105,29 @@ function List({ navigation }: NativeStackScreenProps<RootStackParamList, 'List'>
         </Text>
         <Balance />
       </div>
-      {loading ? (
-        <FullScreenLoadingIndicator />
-      ) : (
-        <FlatList
-          style={{
-            flex: 1,
-            backgroundColor: Colors.dark.background,
-            paddingTop: 35,
-            paddingHorizontal: 20,
-          }}
-          data={data}
-          keyExtractor={(item) => item.id.toString()}
-          ItemSeparatorComponent={ItemSeparatorComponent}
-          renderItem={({ item }) => {
-            return (
-              <TokenRow
-                id={item.id.toString()}
-                name={item.name}
-                imageUrl={item.imageUrl}
-                createdAt={item.createdAt}
-                isImmutable={item.isImmutable}
-                onPress={handlePressTokenRow}
-              />
-            );
-          }}
-        />
-      )}
+      <FlatList
+        style={{
+          flex: 1,
+          backgroundColor: Colors.dark.background,
+          paddingTop: 35,
+          paddingHorizontal: 20,
+        }}
+        data={data}
+        keyExtractor={(item) => item.id.toString()}
+        ItemSeparatorComponent={ItemSeparatorComponent}
+        renderItem={({ item }) => {
+          return (
+            <TokenRow
+              id={item.id.toString()}
+              name={item.name}
+              imageUrl={item.imageUrl}
+              createdAt={item.createdAt}
+              isImmutable={item.isImmutable}
+              onPress={handlePressTokenRow}
+            />
+          );
+        }}
+      />
       <ActionMenu />
     </Screen>
   );
@@ -145,11 +137,19 @@ function Detail({ route, navigation }: NativeStackScreenProps<RootStackParamList
   const globalContext = useContext(GlobalContext);
   const { id } = route.params;
   const [data, setData] = useState(globalContext.accountFiles[id]);
-  console.log(globalContext.accountFiles[id]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(globalContext.loading);
+  }, [globalContext.loading]);
 
   useEffect(() => {
     setData(globalContext.accountFiles[id]);
   }, [globalContext.accountFiles]);
+
+  if (loading) {
+    return <FullScreenLoadingIndicator />;
+  }
 
   const ItemSeparatorComponent = () => (
     <View
@@ -185,9 +185,6 @@ function Detail({ route, navigation }: NativeStackScreenProps<RootStackParamList
 
 function FileViewer({ route }: NativeStackScreenProps<RootStackParamList, 'FileViewer'>) {
   const { fileType, body } = route.params;
-  const video = React.useRef<Video>(null);
-  // @ts-ignore
-  const [status, setStatus] = React.useState<AVPlaybackStatus>({});
 
   if (fileType === 'image') {
     return (
@@ -202,25 +199,26 @@ function FileViewer({ route }: NativeStackScreenProps<RootStackParamList, 'FileV
   } else if (fileType === 'video') {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-        <VideoPlayer
-          videoProps={{
-            shouldPlay: true,
-            resizeMode: ResizeMode.CONTAIN,
-            source: {
-              uri: body,
-            },
-          }}
-        />
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Video
+            source={{ uri: body }}
+            style={{ width: window.innerWidth, height: '100%' }}
+            resizeMode={ResizeMode.CONTAIN}
+            isMuted={false}
+            shouldPlay
+            isLooping
+            onReadyForDisplay={(videoData) => {
+              // @ts-ignore
+              videoData.path[0].style.position = 'relative';
+            }}
+          />
+        </View>
       </View>
     );
   } else if (fileType === 'audio') {
     return <AudioFile uri={body} />;
   } else if (fileType === 'text') {
-    return (
-      <View style={{ flex: 1, padding: 10 }}>
-        <Text>{body}</Text>
-      </View>
-    );
+    return <Text>{body}</Text>;
   } else {
     return (
       <View style={{ flex: 1, padding: 10 }}>
@@ -334,5 +332,16 @@ const styles = StyleSheet.create({
   },
   item: {
     width: '100%',
+  },
+  videoContainer: {
+    flex: 1,
+    backgroundColor: Colors.dark.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100vw',
+    height: '100vh',
+  },
+  video: {
+    alignSelf: 'center',
   },
 });

@@ -43,7 +43,7 @@ export function ActionMenu() {
 
     const file = new File([await res.blob()], name, { type: mimeType });
 
-    await globalContext.drive?.uploadFile(globalContext.currentAccount?.publicKey!, file);
+    await globalContext.uploadFile(file);
   };
 
   return (
@@ -52,7 +52,7 @@ export function ActionMenu() {
         <View
           style={{
             width: '100vw',
-            backgroundColor: '#322A3D',
+            backgroundColor: Colors.dark.inputBackground,
           }}>
           <FabUpload
             icon={<AntDesign name="closecircleo" size={28} color="white" />}
@@ -133,14 +133,14 @@ const styles = StyleSheet.create({
     paddingTop: 25,
   },
   soundtabs: {
-    backgroundColor: '#322A3D',
+    backgroundColor: Colors.dark.inputBackground,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     // marginVertical:5,
     borderBottomWidth: 1,
-    borderBottomColor: '#4B3656',
+    borderBottomColor: Colors.dark.background,
     // borderRadius:5
   },
   soundtabInner: { height: 30, justifyContent: 'center' },

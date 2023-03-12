@@ -31,16 +31,18 @@ export interface GlobalProvider {
   accountFiles: Record<string, any[]>;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
-  selectAccount(arg0: StorageAccountResponse): Promise<void>;
+  selectAccount(account: PublicKey): Promise<void>;
   refreshCurrentAccountFiles(): Promise<string[]>;
   refreshCurrentAccountInfo(): Promise<StorageAccountInfo>;
   refreshCurrentAccountData(): Promise<void>;
   createAccount(accountName: string, size: string): Promise<CreateStorageResponse>;
+  uploadFile(file: any): Promise<void>;
   uploadFiles(Files: any): Promise<ShadowBatchUploadResponse[]>;
   deleteCurrentAccount(): Promise<ShadowDriveResponse>;
   undeleteCurrentAccount(): Promise<ShadowDriveResponse>;
   resizeCurrentAccount(size: number, unit: string): Promise<ShadowDriveResponse>;
   deleteCurrentAccountFile(fileUrl: string): Promise<ShadowDriveResponse>;
+  refreshFiles(): Promise<void>;
 }
 
 export const STORAGE_UNITS = ['KB', 'MB', 'GB'];
@@ -93,10 +95,7 @@ export function GlobalProvider(props: any) {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     refreshAccounts().catch((err) => console.log(err.toString()));
-    setLoading(false);
-    console.log(loading);
   }, [drive]);
 
   useEffect(() => {
@@ -203,6 +202,7 @@ export function GlobalProvider(props: any) {
 
   async function refreshAccounts() {
     return new Promise<StorageAccountResponse[]>(async (resolve, reject) => {
+      setLoading(true);
       if (!drive) {
         reject(new Error('drive not initialized'));
         return;
@@ -229,6 +229,7 @@ export function GlobalProvider(props: any) {
           );
           resolve(accts);
         }
+        setLoading(false);
       } catch (err) {
         reject(err);
       }
@@ -238,6 +239,14 @@ export function GlobalProvider(props: any) {
   async function selectAccount(account: PublicKey) {
     setCurrentAccount(accounts[accounts.map((a) => a.publicKey).indexOf(account)]);
   }
+
+  const refreshFiles = async () => {
+    if (!drive) return;
+    if (currentAccount) {
+      const files = await drive.listObjects(new PublicKey(currentAccount.publicKey));
+      getAccountFiles(currentAccount, files);
+    }
+  };
 
   async function refreshCurrentAccountInfo() {
     return new Promise<StorageAccountInfo>(async (resolve, reject) => {
@@ -329,9 +338,19 @@ export function GlobalProvider(props: any) {
     });
   }
 
+  const uploadFile = async (file: File | ShadowFile) => {
+    setLoading(true);
+
+    await drive?.uploadFile(currentAccount?.publicKey!, file);
+
+    await refreshFiles();
+
+    setLoading(false);
+  };
+
   async function uploadFiles(files: FileList | ShadowFile[]) {
     return new Promise<ShadowBatchUploadResponse[]>(async (resolve, reject) => {
-      console.log(currentAccount, accounts);
+      setLoading(true);
       if (!currentAccount?.publicKey) {
         reject(new Error('a storage account must be selected first'));
         return;
@@ -360,6 +379,7 @@ export function GlobalProvider(props: any) {
       }
 
       resolve(uploads);
+      setLoading(false);
     });
   }
 
@@ -552,10 +572,12 @@ export function GlobalProvider(props: any) {
         refreshCurrentAccountInfo,
         refreshCurrentAccountData,
         createAccount,
+        uploadFile,
         uploadFiles,
         deleteCurrentAccount,
         undeleteCurrentAccount,
         resizeCurrentAccount,
+        refreshFiles,
         deleteCurrentAccountFile,
       }}>
       {props.children}

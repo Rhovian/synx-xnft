@@ -1,5 +1,4 @@
-import Slider from '@react-native-community/slider';
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   TouchableOpacity,
   StyleSheet,
@@ -7,7 +6,6 @@ import {
   Text,
   Image,
   Dimensions,
-  TextInput,
   Keyboard,
   ActivityIndicator,
   TouchableWithoutFeedback,
@@ -25,8 +23,6 @@ const windowHeight = Dimensions.get('window').height;
 export function CreateVault({ navigation }) {
   const [vaultName, setVaultName] = useState('');
   const [vaultSize, setVaultSize] = useState('');
-  const [isImmutable, setIsImmutable] = useState(false);
-  const [isRestrictToken, setIsRestrictToken] = useState(false);
   const [loader, setLoader] = useState(false);
   const [dropdown, setDropdown] = useState(false);
 
@@ -57,8 +53,8 @@ export function CreateVault({ navigation }) {
         });
 
       if (newAccount) {
-        console.log('ttt newAcct: ', newAccount);
-        // navigation.navigate('HomeScreen');
+        globalContext.refreshAccounts();
+        navigation.navigate('Vaults');
       }
       setLoader(false);
     }
