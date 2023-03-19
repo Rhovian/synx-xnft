@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts } from '@expo-google-fonts/dev';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
@@ -12,8 +12,6 @@ import { RecoilRoot } from 'recoil';
 import { GlobalProvider } from './GlobalProvider';
 import { Colors } from './constants';
 import { CreateVault } from './screens/CreateVault';
-import { ExamplesScreens } from './screens/ExamplesScreen';
-import { HomeScreen } from './screens/HomeScreen';
 import { TokenListNavigator } from './screens/TokenNavigator';
 import './App.css';
 
@@ -26,7 +24,6 @@ function TabNavigator() {
     <Tab.Navigator
       initialRouteName="Vaults"
       screenOptions={{
-        tabBarShowLabel: false,
         tabBarActiveTintColor: '#804694',
         tabBarActiveBackgroundColor: Colors.dark.inputBackground,
         tabBarInactiveBackgroundColor: Colors.dark.inputBackground,
@@ -36,22 +33,32 @@ function TabNavigator() {
         },
       }}>
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Vaults"
+        name="Recent"
         component={TokenListNavigator}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="safe" color={color} size={size} />
+            <MaterialCommunityIcons name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="All Files"
+        component={TokenListNavigator}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="folder" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Upload"
+        component={TokenListNavigator}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="cloudupload" color={color} size={size} />
           ),
         }}
       />
@@ -60,6 +67,7 @@ function TabNavigator() {
 }
 
 const HomeStack = createStackNavigator();
+
 function HomeStackScreen() {
   return (
     // @ts-ignore

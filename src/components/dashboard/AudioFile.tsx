@@ -1,7 +1,7 @@
 import { Audio } from 'expo-av';
 import * as React from 'react';
 import { useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button } from 'react-native';
 
 import { Colors } from '../../constants';
 

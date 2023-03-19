@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { Colors, BOLD, MEDIUM, REGULAR } from '../../constants';
 
 // @ts-ignore
-export const FileButton = ({ fileInfo, onPress, style }) => {
+export const FileInfo = ({ fileInfo, onPress, style }) => {
   return (
     <TouchableOpacity style={style} onPress={onPress}>
       <View
@@ -26,7 +26,6 @@ export const FileButton = ({ fileInfo, onPress, style }) => {
           </Text>
         </TouchableOpacity>
       </View>
-      ;
     </TouchableOpacity>
   );
 };

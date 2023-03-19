@@ -19,7 +19,7 @@ export function ActionMenu() {
   const route = useRoute();
 
   const onOpen = () => {
-    if (route.name === 'List') setDisplayVaults(true);
+    if (route.name === 'Vaults') setDisplayVaults(true);
     else setDisplayVaults(false);
     setMenuDisplay(true);
   };

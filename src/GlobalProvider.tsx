@@ -1,10 +1,8 @@
-import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import {
   ShdwDrive,
   StorageAccountResponse,
   ShadowDriveResponse,
   CreateStorageResponse,
-  ShadowBatchUploadResponse,
   StorageAccountInfo,
   ShadowFile,
   ListObjectsResponse,
@@ -14,7 +12,8 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/we
 import React, { createContext, useEffect, useState } from 'react';
 
 import { SHADOW_TOKEN_MINT } from './constants';
-import { usePublicKey, usePublicKeys, useSolanaConnection } from './hooks/xnft-hooks';
+import { usePublicKey, useSolanaConnection } from './hooks/xnft-hooks';
+import { byteSizeUnited, getAccountFileInfo } from './utils';
 
 export interface GlobalProvider {
   connection: Connection;
@@ -32,21 +31,17 @@ export interface GlobalProvider {
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(account: PublicKey): Promise<void>;
-  refreshCurrentAccountFiles(): Promise<string[]>;
   refreshCurrentAccountInfo(): Promise<StorageAccountInfo>;
   refreshCurrentAccountData(): Promise<void>;
+  refreshCurrentAccountFiles(): Promise<string[]>;
   createAccount(accountName: string, size: string): Promise<CreateStorageResponse>;
   uploadFile(file: any): Promise<void>;
-  uploadFiles(Files: any): Promise<ShadowBatchUploadResponse[]>;
   deleteCurrentAccount(): Promise<ShadowDriveResponse>;
   undeleteCurrentAccount(): Promise<ShadowDriveResponse>;
   resizeCurrentAccount(size: number, unit: string): Promise<ShadowDriveResponse>;
   deleteCurrentAccountFile(fileUrl: string): Promise<ShadowDriveResponse>;
   refreshFiles(): Promise<void>;
 }
-
-export const STORAGE_UNITS = ['KB', 'MB', 'GB'];
-
 // @ts-ignore
 export const GlobalContext = createContext<GlobalProvider>({});
 
@@ -108,7 +103,6 @@ export function GlobalProvider(props: any) {
 
   async function refreshCurrentAccountData() {
     refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
-    refreshCurrentAccountFiles().catch((err) => console.log(err.toString()));
   }
 
   async function refreshBalances() {
@@ -117,71 +111,6 @@ export function GlobalProvider(props: any) {
     setShdwTokenAccount(shdwTokenAccount);
     setShdwBalance((await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!);
   }
-
-  function humanFileSize(bytes: number, si = false, dp = 1) {
-    const thresh = si ? 1000 : 1024;
-
-    if (Math.abs(bytes) < thresh) {
-      return bytes + ' B';
-    }
-
-    const units = si
-      ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-      : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-    let u = -1;
-    const r = 10 ** dp;
-
-    do {
-      bytes /= thresh;
-      ++u;
-    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-
-    return bytes.toFixed(dp) + ' ' + units[u];
-  }
-
-  const getAccountFileInfo = (res: Response, name: string) => {
-    const mimeType = res.headers.get('Content-Type');
-    const size = res.headers.get('Content-Length');
-
-    let fileType;
-    let icon;
-
-    if (mimeType?.includes('image')) {
-      fileType = 'image';
-      icon = <MaterialCommunityIcons name="image" size={38} color="yellow" />;
-    } else if (mimeType?.includes('video')) {
-      fileType = 'video';
-      icon = <MaterialCommunityIcons name="video" size={38} color="green" />;
-    } else if (mimeType?.includes('audio')) {
-      fileType = 'audio';
-      icon = <MaterialCommunityIcons name="cast-audio-variant" size={38} color="white" />;
-    } else if (mimeType?.includes('text')) {
-      fileType = 'text';
-      icon = <MaterialCommunityIcons name="file-document" size={38} color="blue" />;
-    } else if (mimeType?.includes('application')) {
-      if (mimeType?.includes('octet')) {
-        icon = <AntDesign name="questioncircleo" size={38} color="red" />;
-        fileType = 'unknown';
-      } else {
-        fileType = 'application';
-        icon = <MaterialCommunityIcons name="application-cog" size={38} color="orange" />;
-      }
-    } else {
-      icon = <AntDesign name="questioncircleo" size={38} color="red" />;
-      fileType = 'unknown';
-    }
-
-    const hrsize = humanFileSize(parseInt(size!, 10));
-    const body = res.url;
-
-    return {
-      fileType,
-      icon,
-      name,
-      size: hrsize,
-      body,
-    };
-  };
 
   const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {
     const accountKey = account.publicKey.toString();
@@ -240,6 +169,30 @@ export function GlobalProvider(props: any) {
     setCurrentAccount(accounts[accounts.map((a) => a.publicKey).indexOf(account)]);
   }
 
+  async function refreshCurrentAccountFiles() {
+    return new Promise<string[]>(async (resolve, reject) => {
+      if (!currentAccount?.publicKey) {
+        reject(new Error('current account is not set'));
+        return;
+      }
+
+      if (!drive) {
+        reject(new Error('drive not initialized'));
+        return;
+      }
+
+      const fileGroup = await drive
+        .listObjects(new PublicKey(currentAccount.publicKey))
+        .catch((err) => reject(err));
+
+      if (fileGroup) {
+        const sortedKeys = fileGroup?.keys?.sort();
+        setCurrentAccountFiles(sortedKeys);
+        resolve(sortedKeys);
+      }
+    });
+  }
+
   const refreshFiles = async () => {
     if (!drive) return;
     if (currentAccount) {
@@ -271,30 +224,6 @@ export function GlobalProvider(props: any) {
     });
   }
 
-  async function refreshCurrentAccountFiles() {
-    return new Promise<string[]>(async (resolve, reject) => {
-      if (!currentAccount?.publicKey) {
-        reject(new Error('current account is not set'));
-        return;
-      }
-
-      if (!drive) {
-        reject(new Error('drive not initialized'));
-        return;
-      }
-
-      const fileGroup = await drive
-        .listObjects(new PublicKey(currentAccount.publicKey))
-        .catch((err) => reject(err));
-
-      if (fileGroup) {
-        const sortedKeys = fileGroup?.keys?.sort();
-        setCurrentAccountFiles(sortedKeys);
-        resolve(sortedKeys);
-      }
-    });
-  }
-
   async function createAccount(accountName: string, size: string) {
     return new Promise<CreateStorageResponse>(async (resolve, reject) => {
       if (!accountName?.trim()) {
@@ -305,12 +234,6 @@ export function GlobalProvider(props: any) {
         reject(new Error('specified size is not a valid number'));
         return;
       }
-      /*
-      if (!STORAGE_UNITS.includes(size)) {
-        reject(new Error('specified unit size is invalid'));
-        return;
-      }
-      */
 
       if (!drive) {
         reject(new Error('drive not initialized'));
@@ -347,41 +270,6 @@ export function GlobalProvider(props: any) {
 
     setLoading(false);
   };
-
-  async function uploadFiles(files: FileList | ShadowFile[]) {
-    return new Promise<ShadowBatchUploadResponse[]>(async (resolve, reject) => {
-      setLoading(true);
-      if (!currentAccount?.publicKey) {
-        reject(new Error('a storage account must be selected first'));
-        return;
-      }
-
-      if (!drive) {
-        reject(new Error('drive not initialized'));
-        return;
-      }
-
-      const storageKey = new PublicKey(currentAccount.publicKey);
-
-      const uploads = await drive
-        .uploadMultipleFiles(storageKey, files)
-        .catch((err) => reject(err.toString()));
-
-      if (!uploads) return;
-
-      const failures = uploads.filter((u) => !u.location).map((f) => `${f.fileName}: ${f.status}`);
-
-      refreshCurrentAccountData();
-
-      if (failures) {
-        reject(failures.concat(failures));
-        return;
-      }
-
-      resolve(uploads);
-      setLoading(false);
-    });
-  }
 
   async function deleteCurrentAccount() {
     return new Promise<ShadowDriveResponse>(async (resolve, reject) => {
@@ -444,10 +332,6 @@ export function GlobalProvider(props: any) {
       }
       if (size <= 0) {
         reject(new Error('size must be greater than 0'));
-        return;
-      }
-      if (!STORAGE_UNITS.includes(unit)) {
-        reject(new Error('specified unit size is invalid'));
         return;
       }
 
@@ -516,16 +400,6 @@ export function GlobalProvider(props: any) {
     });
   }
 
-  function byteSizeUnited(n: number) {
-    return n < 1024
-      ? '1KB'
-      : n < 1048576
-      ? (n / 1024).toFixed(0) + 'KB'
-      : n < 1073741824
-      ? (n / 1048576).toFixed(0) + 'MB'
-      : (n / 1073741824).toFixed(0) + 'GB';
-  }
-
   async function deleteCurrentAccountFile(fileUrl: string) {
     return new Promise<any>(async (resolve, reject) => {
       if (!currentAccount?.publicKey) {
@@ -564,16 +438,15 @@ export function GlobalProvider(props: any) {
         accounts,
         currentAccount,
         currentAccountInfo,
-        currentAccountFiles,
         refreshBalances,
         refreshAccounts,
+        currentAccountFiles,
         selectAccount,
-        refreshCurrentAccountFiles,
         refreshCurrentAccountInfo,
+        refreshCurrentAccountFiles,
         refreshCurrentAccountData,
         createAccount,
         uploadFile,
-        uploadFiles,
         deleteCurrentAccount,
         undeleteCurrentAccount,
         resizeCurrentAccount,

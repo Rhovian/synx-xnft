@@ -12,9 +12,7 @@ import {
 } from 'react-native';
 
 import { GlobalContext } from '../GlobalProvider';
-import { AlertMessage } from '../components/Alert';
 import BackButton from '../components/BackButton';
-import CustomStatusBar from '../components/StatusBarComponent';
 import { BOLD, REGULAR, Colors } from '../constants';
 
 const windowHeight = Dimensions.get('window').height;
@@ -32,18 +30,6 @@ export function CreateVault({ navigation }) {
 
   const triggerCreateVault = async () => {
     if (!vaultName) {
-      AlertMessage(
-        'Vault Name is missing',
-        'Please provide Vault Name and try again. Thanks',
-        'red'
-      );
-    } else if (!vaultSize) {
-      AlertMessage(
-        'Vault Size is missing',
-        'Please select Vault Size and try again. Thanks',
-        'red'
-      );
-    } else {
       setLoader(true);
       /** Create the vault here */
       const newAccount = await globalContext
@@ -67,7 +53,6 @@ export function CreateVault({ navigation }) {
       }}>
       <View style={styles.container}>
         <View style={{ width: '100%', height: '80%' }}>
-          <CustomStatusBar backgroundColor={Colors['dark'].background} />
           <BackButton goBack={navigation.goBack} title="Create New Vault" />
           <View style={{ width: '100%', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
@@ -468,99 +453,6 @@ export function CreateVault({ navigation }) {
                           Make Vault Immutable
                         </Text>
                       </View>
-
-                      {/*<View
-                        style={{
-                          width: '20%',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          alignContent: 'center',
-                        }}>
-                        <SwitchToggle
-                          switchOn={isImmutable}
-                          onPress={() => setIsImmutable(!isImmutable)}
-                          circleColorOff="#322A3D"
-                          circleColorOn="#322A3D"
-                          backgroundColorOn="#804694"
-                          backgroundColorOff="#493750"
-                          containerStyle={{
-                            // marginTop: 16,
-                            width: 40,
-                            height: 20,
-                            borderRadius: 25,
-                            padding: 5,
-                          }}
-                          circleStyle={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 20,
-                          }}
-                        />
-                      </View>
-                      */}
-                    </View>
-                  </View>
-
-                  <View style={{ width: '100%' }}>
-                    <View style={{ marginTop: 30 }}>
-                      <Text
-                        allowFontScaling={false}
-                        style={{ fontSize: 16, fontFamily: REGULAR, color: '#fff' }}>
-                        Token Gated Content
-                      </Text>
-                    </View>
-
-                    <View
-                      style={{
-                        marginTop: 15,
-                        width: '100%',
-                        flexDirection: 'row',
-                        backgroundColor: '#322A3d',
-                        borderRadius: 10,
-                        height: 40,
-                      }}>
-                      <View style={{ width: '80%', justifyContent: 'center' }}>
-                        <Text
-                          allowFontScaling={false}
-                          style={{
-                            fontSize: 12,
-                            fontFamily: REGULAR,
-                            color: '#fff',
-                            paddingLeft: 10,
-                          }}>
-                          Restrict Token Access
-                        </Text>
-                      </View>
-
-                      {/*<View
-                        style={{
-                          width: '20%',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          alignContent: 'center',
-                        }}>
-                        <SwitchToggle
-                          switchOn={isRestrictToken}
-                          onPress={() => setIsRestrictToken(!isRestrictToken)}
-                          circleColorOff="#322A3D"
-                          circleColorOn="#322A3D"
-                          backgroundColorOn="#804694"
-                          backgroundColorOff="#493750"
-                          containerStyle={{
-                            // marginTop: 16,
-                            width: 40,
-                            height: 20,
-                            borderRadius: 25,
-                            padding: 5,
-                          }}
-                          circleStyle={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 20,
-                          }}
-                        />
-                      </View>
-                      */}
                     </View>
                   </View>
                 </>
