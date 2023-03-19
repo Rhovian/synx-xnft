@@ -7,7 +7,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { ActionMenu } from './ActionMenu';
 import { Screen } from './Screen';
 import { TokenRow } from './TokenRow';
-import { Balance } from './dashboard/Balance';
+import { Balance } from './Balance';
 import { GlobalContext } from '../GlobalProvider';
 import { BOLD, Colors } from '../constants';
 import { RootStackParamList } from '../models';

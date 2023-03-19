@@ -6,12 +6,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Buffer } from 'buffer';
 import { registerRootComponent } from 'expo';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Image, Text } from 'react-native';
 import { RecoilRoot } from 'recoil';
 
 import { GlobalProvider } from './GlobalProvider';
-import { Colors } from './constants';
-import { CreateVault } from './screens/CreateVault';
+import { BOLD, Colors } from './constants';
+import { Sandbox } from './screens/Sandbox';
 import { TokenListNavigator } from './screens/TokenNavigator';
 import './App.css';
 
@@ -22,7 +22,7 @@ const Tab = createBottomTabNavigator();
 function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Vaults"
+      initialRouteName="Recent"
       screenOptions={{
         tabBarActiveTintColor: '#804694',
         tabBarActiveBackgroundColor: Colors.dark.inputBackground,
@@ -34,11 +34,37 @@ function TabNavigator() {
       }}>
       <Tab.Screen
         name="Recent"
-        component={TokenListNavigator}
+        component={Sandbox}
         options={{
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" color={color} size={size} />
+          ),
+          headerStyle: {
+            backgroundColor: Colors.dark.inputBackground,
+            borderBottomColor: '#303030',
+            borderBottomWidth: 1,
+            maxHeight: 55,
+          },
+          headerLeft: () => (
+            <div>
+              <Image
+                style={{ marginLeft: 10, width: 40, height: 40, resizeMode: 'cover' }}
+                source={require('./assets/synx-logo.png')}
+              />
+            </div>
+          ),
+          headerRight: () => (
+            <div style={{ width: '100%' }}>
+              <Text
+                style={{
+                  color: Colors.dark.text,
+                  fontSize: 19,
+                  paddingLeft: 21,
+                  fontFamily: BOLD,
+                }}>
+                Recent
+              </Text>
+            </div>
           ),
         }}
       />
@@ -73,7 +99,6 @@ function HomeStackScreen() {
     // @ts-ignore
     <HomeStack.Navigator headerMode="none">
       <HomeStack.Screen name="App" component={TabNavigator} />
-      <HomeStack.Screen name="CreateVault" component={CreateVault} />
     </HomeStack.Navigator>
   );
 }

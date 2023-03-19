@@ -12,7 +12,6 @@ export function Screen({ style, children }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    padding: 12,
     paddingBottom: 0,
   },
 });
