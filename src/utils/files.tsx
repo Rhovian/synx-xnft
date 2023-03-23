@@ -4,7 +4,7 @@ import React from 'react';
 
 import { humanFileSize } from '.';
 
-export const getAccountFileInfo = (res: Response, name: string) => {
+export const getAccountFileInfo = (res: Response, name: string, vault: string) => {
   const mimeType = res.headers.get('Content-Type');
   const size = res.headers.get('Content-Length');
 
@@ -45,6 +45,7 @@ export const getAccountFileInfo = (res: Response, name: string) => {
     name,
     size: hrsize,
     body,
+    vault,
   };
 };
 

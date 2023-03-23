@@ -1,10 +1,22 @@
-import React from 'react';
+import { Entypo } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import React, { useContext } from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { Colors, BOLD, MEDIUM, REGULAR } from '../../constants';
+import { GlobalContext } from '../GlobalProvider';
+import { Colors, BOLD, REGULAR } from '../constants';
+import { FileInfo } from '../models';
 
 // @ts-ignore
-export const FileInfo = ({ fileInfo }) => {
+export const PesonalFileInfo = ({ fileInfo }: FileInfo) => {
+  const globalContext = useContext(GlobalContext);
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    globalContext.setFileMenu(fileInfo);
+  };
+
   return (
     <TouchableOpacity style={styles.container}>
       <div style={styles.iconWrapper}>{fileInfo.icon}</div>
@@ -12,12 +24,8 @@ export const FileInfo = ({ fileInfo }) => {
         <Text style={styles.name}>{fileInfo.name.slice(0, 16)}...</Text>
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>
       </div>
-      <TouchableOpacity
-        style={styles.immutableButton}
-        onPress={() => console.log('go to file viewer')}>
-        <Text style={{ fontSize: 12, color: Colors.dark.text, fontFamily: MEDIUM }}>
-          {fileInfo.size}
-        </Text>
+      <TouchableOpacity style={styles.immutableButton} onPress={() => handlePress()}>
+        <Entypo name="dots-three-vertical" size={20} color="grey" />{' '}
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -53,12 +61,9 @@ const styles = StyleSheet.create({
     fontFamily: REGULAR,
   },
   immutableButton: {
-    fontSize: 12,
-    color: Colors.dark.text,
-    fontFamily: BOLD,
     flexGrow: 1,
     display: 'flex',
     textAlign: 'end',
-    paddingRight: 8,
+    paddingRight: 12,
   },
 });

@@ -13,6 +13,7 @@ import React, { createContext, useEffect, useState } from 'react';
 
 import { SHADOW_TOKEN_MINT } from './constants';
 import { usePublicKey, useSolanaConnection } from './hooks/xnft-hooks';
+import { FileInfo } from './models';
 import { byteSizeUnited, getAccountFileInfo } from './utils';
 
 export interface GlobalProvider {
@@ -28,6 +29,7 @@ export interface GlobalProvider {
   currentAccountInfo: any;
   currentAccountFiles: any[];
   accountFiles: Record<string, any[]>;
+  fileMenuOpen: boolean;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(account: PublicKey): Promise<void>;
@@ -41,6 +43,8 @@ export interface GlobalProvider {
   resizeCurrentAccount(size: number, unit: string): Promise<ShadowDriveResponse>;
   deleteCurrentAccountFile(fileUrl: string): Promise<ShadowDriveResponse>;
   refreshFiles(): Promise<void>;
+  setFileMenu(file: FileInfo): void;
+  setFileMenuOpen(open: boolean): void;
 }
 // @ts-ignore
 export const GlobalContext = createContext<GlobalProvider>({});
@@ -58,6 +62,8 @@ export function GlobalProvider(props: any) {
   const [currentAccountFiles, setCurrentAccountFiles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [accountFiles, setAccountFiles] = useState<Record<string, any[]>>({});
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
+  const [currentFile, setCurrentFile] = useState<FileInfo>();
 
   useEffect(() => {
     (async () => {
@@ -105,6 +111,11 @@ export function GlobalProvider(props: any) {
     refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
   }
 
+  function setFileMenu(file: FileInfo) {
+    setFileMenuOpen(true);
+    setCurrentFile(file);
+  }
+
   async function refreshBalances() {
     setSolBalance((await connection.getBalance(wallet)) / LAMPORTS_PER_SOL);
     const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
@@ -120,7 +131,7 @@ export function GlobalProvider(props: any) {
           `https://shdw-drive.genesysgo.net/` + account.publicKey + '/' + file
         );
 
-        return getAccountFileInfo(res, file);
+        return getAccountFileInfo(res, file, accountKey);
       })
     );
     setAccountFiles((prevAccountFiles) => ({
@@ -438,6 +449,7 @@ export function GlobalProvider(props: any) {
         accounts,
         currentAccount,
         currentAccountInfo,
+        fileMenuOpen,
         refreshBalances,
         refreshAccounts,
         currentAccountFiles,
@@ -452,6 +464,8 @@ export function GlobalProvider(props: any) {
         resizeCurrentAccount,
         refreshFiles,
         deleteCurrentAccountFile,
+        setFileMenu,
+        setFileMenuOpen,
       }}>
       {props.children}
     </GlobalContext.Provider>

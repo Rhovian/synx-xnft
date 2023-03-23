@@ -11,7 +11,8 @@ import { RecoilRoot } from 'recoil';
 
 import { GlobalProvider } from './GlobalProvider';
 import { BOLD, Colors } from './constants';
-import { Sandbox } from './screens/Sandbox';
+import { Personal } from './screens/Personal';
+import { Recent } from './screens/Recent';
 import { TokenListNavigator } from './screens/TokenNavigator';
 import './App.css';
 
@@ -22,7 +23,7 @@ const Tab = createBottomTabNavigator();
 function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Recent"
+      initialRouteName="All Files"
       screenOptions={{
         tabBarActiveTintColor: '#804694',
         tabBarActiveBackgroundColor: Colors.dark.inputBackground,
@@ -34,7 +35,7 @@ function TabNavigator() {
       }}>
       <Tab.Screen
         name="Recent"
-        component={Sandbox}
+        component={Recent}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" color={color} size={size} />
@@ -70,11 +71,37 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="All Files"
-        component={TokenListNavigator}
+        component={Personal}
         options={{
-          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="folder" color={color} size={size} />
+            <MaterialCommunityIcons name="home" color={color} size={size} />
+          ),
+          headerStyle: {
+            backgroundColor: Colors.dark.inputBackground,
+            borderBottomColor: '#303030',
+            borderBottomWidth: 1,
+            maxHeight: 55,
+          },
+          headerLeft: () => (
+            <div>
+              <Image
+                style={{ marginLeft: 10, width: 40, height: 40, resizeMode: 'cover' }}
+                source={require('./assets/synx-logo.png')}
+              />
+            </div>
+          ),
+          headerRight: () => (
+            <div style={{ width: '100%' }}>
+              <Text
+                style={{
+                  color: Colors.dark.text,
+                  fontSize: 19,
+                  paddingLeft: 14,
+                  fontFamily: BOLD,
+                }}>
+                Personal
+              </Text>
+            </div>
           ),
         }}
       />

@@ -4,7 +4,6 @@ import { Animated } from 'react-native';
 
 // @ts-ignore
 import { FileViewer } from '../components/FileViewer';
-import { Files } from '../components/Files';
 import { VaultsList } from '../components/Vaults';
 import { BOLD, Colors } from '../constants';
 import { RootStackParamList } from '../models';
@@ -69,20 +68,6 @@ export const TokenListNavigator = () => {
             fontFamily: BOLD,
           },
           headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="Files"
-        component={Files}
-        options={{
-          title: 'Vault Files',
-          headerStyle: {
-            backgroundColor: Colors.dark.background,
-          },
-          headerTitleStyle: {
-            color: Colors.dark.text,
-            fontFamily: BOLD,
-          },
         }}
       />
       <Stack.Screen
