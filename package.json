@@ -40,6 +40,7 @@
     "react-dom": "18.2.0",
     "react-error-overlay": "6.0.9",
     "react-native": "0.71.3",
+    "react-native-dropdown-picker": "^5.4.6",
     "react-native-elements": "^3.4.3",
     "react-native-file-type": "^1.0.0",
     "react-native-flash-message": "^0.4.0",
