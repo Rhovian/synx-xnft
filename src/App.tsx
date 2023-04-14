@@ -1,4 +1,4 @@
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts } from '@expo-google-fonts/dev';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
@@ -6,113 +6,63 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Buffer } from 'buffer';
 import { registerRootComponent } from 'expo';
 import React from 'react';
-import { ActivityIndicator, View, Image, Text } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { RecoilRoot } from 'recoil';
 
 import { GlobalProvider } from './GlobalProvider';
-import { BOLD, Colors } from './constants';
+import { Colors } from './constants';
 import { Personal } from './screens/Personal';
 import { Recent } from './screens/Recent';
-import { TokenListNavigator } from './screens/TokenNavigator';
+import { Upload } from './screens/Upload';
 import './App.css';
+import { HeaderLeft, HeaderRight } from './utils';
 
 global.Buffer = global.Buffer || Buffer;
 
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
+  const tabBarIcon = ({ color, size }: { color: string; size: number }) => (
+    <MaterialCommunityIcons name="home" color={color} size={size} />
+  );
+
   return (
     <Tab.Navigator
-      initialRouteName="All Files"
+      initialRouteName="Personal"
       screenOptions={{
         tabBarActiveTintColor: '#804694',
         tabBarActiveBackgroundColor: Colors.dark.inputBackground,
         tabBarInactiveBackgroundColor: Colors.dark.inputBackground,
-        tabBarStyle: {
-          borderTopColor: Colors.dark.background,
-          borderTopWidth: 0,
-        },
+        tabBarStyle: styles.tabBarStyle,
       }}>
       <Tab.Screen
         name="Recent"
         component={Recent}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" color={color} size={size} />
-          ),
-          headerStyle: {
-            backgroundColor: Colors.dark.inputBackground,
-            borderBottomColor: '#303030',
-            borderBottomWidth: 1,
-            maxHeight: 55,
-          },
-          headerLeft: () => (
-            <div>
-              <Image
-                style={{ marginLeft: 10, width: 40, height: 40, resizeMode: 'cover' }}
-                source={require('./assets/synx-logo.png')}
-              />
-            </div>
-          ),
-          headerRight: () => (
-            <div style={{ width: '100%' }}>
-              <Text
-                style={{
-                  color: Colors.dark.text,
-                  fontSize: 19,
-                  paddingLeft: 21,
-                  fontFamily: BOLD,
-                }}>
-                Recent
-              </Text>
-            </div>
-          ),
+          tabBarIcon,
+          headerStyle: styles.headerStyle,
+          headerLeft: () => <HeaderLeft />,
+          headerRight: () => <HeaderRight title="Recent" />,
         }}
       />
       <Tab.Screen
-        name="All Files"
+        name="Personal"
         component={Personal}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" color={color} size={size} />
-          ),
-          headerStyle: {
-            backgroundColor: Colors.dark.inputBackground,
-            borderBottomColor: '#303030',
-            borderBottomWidth: 1,
-            maxHeight: 55,
-          },
-          headerLeft: () => (
-            <div>
-              <Image
-                style={{ marginLeft: 10, width: 40, height: 40, resizeMode: 'cover' }}
-                source={require('./assets/synx-logo.png')}
-              />
-            </div>
-          ),
-          headerRight: () => (
-            <div style={{ width: '100%' }}>
-              <Text
-                style={{
-                  color: Colors.dark.text,
-                  fontSize: 19,
-                  paddingLeft: 14,
-                  fontFamily: BOLD,
-                }}>
-                Personal
-              </Text>
-            </div>
-          ),
+          tabBarIcon,
+          headerStyle: styles.headerStyle,
+          headerLeft: () => <HeaderLeft />,
+          headerRight: () => <HeaderRight title="Personal" />,
         }}
       />
       <Tab.Screen
         name="Upload"
-        component={TokenListNavigator}
+        component={Upload}
         options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="cloudupload" color={color} size={size} />
-          ),
+          tabBarIcon,
+          headerStyle: styles.headerStyle,
+          headerLeft: () => <HeaderLeft />,
+          headerRight: () => <HeaderRight title="Upload" />,
         }}
       />
     </Tab.Navigator>
@@ -155,5 +105,18 @@ function App() {
     </RecoilRoot>
   );
 }
+
+const styles = {
+  headerStyle: {
+    backgroundColor: Colors.dark.inputBackground,
+    borderBottomColor: '#303030',
+    borderBottomWidth: 1,
+    maxHeight: 55,
+  },
+  tabBarStyle: {
+    borderTopColor: Colors.dark.background,
+    borderTopWidth: 0,
+  },
+};
 
 export default registerRootComponent(App);

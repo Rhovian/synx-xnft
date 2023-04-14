@@ -1,13 +1,22 @@
-import React from 'react';
-import { Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 import { Colors, BOLD, MEDIUM, REGULAR } from '../../constants';
+import { FileInfo } from '../../models';
 
 // @ts-ignore
-export const FileInfo = ({ fileInfo }) => {
+export const RecentFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
+  const [fileIcon, setFileIcon] = React.useState<any>(null);
+
+  useEffect(() => {
+    if (fileInfo) {
+      setFileIcon(require(`../../assets/${fileInfo.fileType}-icon.png`));
+    }
+  }, [fileInfo]);
+
   return (
     <TouchableOpacity style={styles.container}>
-      <div style={styles.iconWrapper}>{fileInfo.icon}</div>
+      <Image source={fileIcon} resizeMode="contain" style={styles.iconWrapper} />
       <div style={styles.infoContainer}>
         <Text style={styles.name}>{fileInfo.name.slice(0, 16)}...</Text>
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>
@@ -33,7 +42,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   iconWrapper: {
-    paddingLeft: 8,
+    marginLeft: 8,
+    width: 30,
+    height: 34,
   },
   name: {
     fontSize: 14,

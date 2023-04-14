@@ -9,38 +9,38 @@ import {
   Keyboard,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  Switch,
 } from 'react-native';
 
-import { GlobalContext } from '../GlobalProvider';
-import BackButton from '../components/BackButton';
-import { BOLD, REGULAR, Colors } from '../constants';
+import { GlobalContext } from '../../GlobalProvider';
+import { BOLD, REGULAR, Colors, MEDIUM } from '../../constants';
 
 const windowHeight = Dimensions.get('window').height;
 
 // @ts-ignore
-export function CreateVault({ navigation }) {
+export function CreateVault() {
   const [vaultName, setVaultName] = useState('');
   const [vaultSize, setVaultSize] = useState('');
-  const [loader, setLoader] = useState(false);
+  const [loader, setLoader] = useState(true);
   const [dropdown, setDropdown] = useState(false);
+  const [immutable, setImmutable] = useState(false);
 
   const globalContext = useContext(GlobalContext);
 
   const changeRate = (size: string) => {};
 
   const triggerCreateVault = async () => {
-    if (!vaultName) {
+    if (vaultName !== '' && vaultSize !== '') {
       setLoader(true);
       /** Create the vault here */
       const newAccount = await globalContext
-        .createAccount(vaultName, vaultSize.replaceAll(' ', ''))
+        .createAccount(vaultName, vaultSize.replaceAll(' ', ''), immutable)
         .catch((err) => {
           console.log(err);
         });
 
       if (newAccount) {
         globalContext.refreshAccounts();
-        navigation.navigate('Vaults');
       }
       setLoader(false);
     }
@@ -52,44 +52,44 @@ export function CreateVault({ navigation }) {
         setDropdown(false);
       }}>
       <View style={styles.container}>
-        <View style={{ width: '100%', height: '80%' }}>
-          <BackButton goBack={navigation.goBack} title="Create New Vault" />
+        <View style={{ width: '100%', height: '80%', marginTop: 16 }}>
           <View style={{ width: '100%', alignItems: 'center' }}>
-            <View style={{ width: '90%' }}>
-              <View
-                style={{
-                  marginTop: 30,
-                }}>
+            <View style={{ width: '100%' }}>
+              <View>
                 <View style={{}}>
                   <Text
                     allowFontScaling={false}
-                    style={{ fontSize: 16, fontFamily: REGULAR, color: '#fff' }}>
+                    style={{ fontSize: 14, fontFamily: BOLD, color: Colors.dark.text }}>
                     Vault Name
                   </Text>
                 </View>
                 <View
                   style={{
-                    marginTop: 15,
+                    marginTop: 5,
                     width: '100%',
                     flexDirection: 'row',
-                    backgroundColor: '#322A3d',
+                    backgroundColor: 'transparent',
                     borderRadius: 10,
                   }}>
-                  <View style={{ width: '90%' }}>
-                    <View style={{ width: '100%', paddingHorizontal: 10 }}>
+                  <View style={{ width: '100%' }}>
+                    <View style={{ width: '95%' }}>
                       <textarea
                         id="createVaultInput"
                         style={{
                           color: Colors.dark.text,
                           fontSize: 12,
-                          fontFamily: REGULAR,
+                          fontFamily: MEDIUM,
                           height: 35,
                           backgroundColor: 'transparent',
-                          border: 'none',
                           resize: 'none',
-                          paddingTop: 5,
+                          paddingTop: 2,
+                          paddingLeft: 10,
+                          borderRadius: 10,
+                          borderColor: Colors.dark.innerBackground,
+
+                          width: '100%',
                         }}
-                        placeholder="Name of Vault"
+                        placeholder="Input text"
                         value={vaultName}
                         onChange={(val) => setVaultName(val.target.value as any)}
                       />
@@ -101,18 +101,23 @@ export function CreateVault({ navigation }) {
                 <View style={{ marginTop: 30 }}>
                   <Text
                     allowFontScaling={false}
-                    style={{ fontSize: 16, fontFamily: REGULAR, color: '#fff' }}>
-                    Size of Vault
+                    style={{
+                      fontSize: 14,
+                      fontFamily: MEDIUM,
+                      color: Colors.dark.text,
+                      paddingLeft: 2,
+                    }}>
+                    Vault Size
                   </Text>
                 </View>
                 {dropdown ? (
                   <View
                     style={{
-                      marginTop: 15,
                       width: '100%',
-                      backgroundColor: '#322A3d',
+                      flexDirection: 'column',
+                      backgroundColor: 'transparent',
                       borderRadius: 10,
-                      paddingBottom: 15,
+                      borderColor: Colors.dark.innerBackground,
                     }}>
                     <TouchableOpacity
                       onPress={() => setDropdown(!dropdown)}
@@ -144,7 +149,7 @@ export function CreateVault({ navigation }) {
                         }}>
                         <Image
                           style={{ width: 20, height: 20, resizeMode: 'contain' }}
-                          source={require('../assets/create_vault/down.png')}
+                          source={require('../../assets/create_vault/down.png')}
                         />
                       </View>
                     </TouchableOpacity>
@@ -182,7 +187,7 @@ export function CreateVault({ navigation }) {
                           }}>
                           <Image
                             style={{ width: 30, height: 30, resizeMode: 'contain' }}
-                            source={require('../assets/create_vault/starter.png')}
+                            source={require('../../assets/create_vault/starter.png')}
                           />
                         </View>
                       </View>
@@ -239,7 +244,7 @@ export function CreateVault({ navigation }) {
                           }}>
                           <Image
                             style={{ width: 25, height: 25, resizeMode: 'contain' }}
-                            source={require('../assets/create_vault/faster.png')}
+                            source={require('../../assets/create_vault/faster.png')}
                           />
                         </View>
                       </View>
@@ -296,7 +301,7 @@ export function CreateVault({ navigation }) {
                           }}>
                           <Image
                             style={{ width: 30, height: 30, resizeMode: 'contain' }}
-                            source={require('../assets/create_vault/master.png')}
+                            source={require('../../assets/create_vault/master.png')}
                           />
                         </View>
                       </View>
@@ -353,7 +358,7 @@ export function CreateVault({ navigation }) {
                           }}>
                           <Image
                             style={{ width: 30, height: 30, resizeMode: 'contain' }}
-                            source={require('../assets/create_vault/blaster.png')}
+                            source={require('../../assets/create_vault/blaster.png')}
                           />
                         </View>
                       </View>
@@ -381,9 +386,8 @@ export function CreateVault({ navigation }) {
                 ) : (
                   <View
                     style={{
-                      marginTop: 15,
+                      marginTop: 5,
                       width: '100%',
-                      backgroundColor: '#322A3d',
                       borderRadius: 10,
                     }}>
                     <TouchableOpacity
@@ -391,6 +395,9 @@ export function CreateVault({ navigation }) {
                       style={{
                         flexDirection: 'row',
                         height: 45,
+                        borderColor: Colors.dark.innerBackground,
+                        borderWidth: 1,
+                        borderRadius: 10,
                       }}>
                       <View style={{ width: '80%', justifyContent: 'center' }}>
                         <Text
@@ -414,7 +421,7 @@ export function CreateVault({ navigation }) {
                         }}>
                         <Image
                           style={{ width: 20, height: 20, resizeMode: 'contain' }}
-                          source={require('../assets/create_vault/down.png')}
+                          source={require('../../assets/create_vault/down.png')}
                         />
                       </View>
                     </TouchableOpacity>
@@ -427,21 +434,29 @@ export function CreateVault({ navigation }) {
                     <View style={{ marginTop: 30 }}>
                       <Text
                         allowFontScaling={false}
-                        style={{ fontSize: 16, fontFamily: REGULAR, color: '#fff' }}>
+                        style={{ fontSize: 14, fontFamily: MEDIUM, color: '#fff', paddingLeft: 2 }}>
                         Immutable Vault
                       </Text>
                     </View>
 
                     <View
                       style={{
-                        marginTop: 15,
+                        marginTop: 5,
                         width: '100%',
                         flexDirection: 'row',
-                        backgroundColor: '#322A3d',
                         borderRadius: 10,
                         height: 40,
+                        borderWidth: 1,
+                        borderColor: Colors.dark.innerBackground,
                       }}>
-                      <View style={{ width: '80%', justifyContent: 'center' }}>
+                      <View
+                        style={{
+                          width: '100%',
+                          justifyContent: 'flex-start',
+                          alignItems: 'center',
+                          display: 'flex',
+                          flexDirection: 'row',
+                        }}>
                         <Text
                           allowFontScaling={false}
                           style={{
@@ -449,9 +464,29 @@ export function CreateVault({ navigation }) {
                             fontFamily: REGULAR,
                             color: '#fff',
                             paddingLeft: 10,
+                            opacity: 0.6,
                           }}>
                           Make Vault Immutable
                         </Text>
+                        <View
+                          style={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'flex-end',
+                          }}>
+                          <Switch
+                            thumbColor={Colors.dark.innerBackground}
+                            style={{
+                              transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }],
+                              marginRight: 8,
+                            }}
+                            activeThumbColor="#FFA2C0"
+                            trackColor={{ false: '#FFA2C0', true: Colors.dark.innerBackground }}
+                            value={immutable}
+                            onValueChange={setImmutable}
+                          />
+                        </View>
                       </View>
                     </View>
                   </View>
@@ -461,18 +496,18 @@ export function CreateVault({ navigation }) {
           </View>
         </View>
         <View style={{ width: '100%', alignItems: 'center' }}>
-          <View style={{ width: '90%' }}>
+          <View style={{ width: '100%' }}>
             {loader ? (
               <View
                 style={{
-                  marginTop: 55,
+                  marginTop: 40,
                   width: '100%',
-                  backgroundColor: '#804694',
-                  borderRadius: 5,
-                  paddingVertical: 13,
+                  backgroundColor: '#6C5DD3',
+                  borderRadius: 7,
                   alignItems: 'center',
                   alignContent: 'center',
                   justifyContent: 'center',
+                  minHeight: 40,
                 }}>
                 <ActivityIndicator size="small" color="#fff" />
               </View>
@@ -480,10 +515,10 @@ export function CreateVault({ navigation }) {
               <TouchableOpacity
                 onPress={() => triggerCreateVault()}
                 style={{
-                  marginTop: 55,
+                  marginTop: 40,
                   width: '100%',
-                  backgroundColor: '#804694',
-                  borderRadius: 5,
+                  backgroundColor: '#6C5DD3',
+                  borderRadius: 7,
                   paddingVertical: 13,
                   alignItems: 'center',
                   alignContent: 'center',
@@ -511,50 +546,12 @@ export function CreateVault({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 25,
+    paddingVertical: 5,
+    marginTop: 30,
     width: '100%',
     height: windowHeight,
-    backgroundColor: Colors['dark'].background,
-  },
-  sheetImage: { width: 25, height: 25 },
-
-  tabs: {
-    backgroundColor: '#322A3D',
-    padding: 15,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItem: 'center',
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  soundtabs: {
-    width: '100%',
-    paddingHorizontal: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItem: 'center',
-    // marginVertical:5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#4B3656',
-    // borderRadius:5
-  },
-  soundtabInner: { height: 50, justifyContent: 'center' },
-  soundtab: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItem: 'center',
-    // marginVertical:5,
-    // borderRadius:5
-  },
-  soundtabText: {
-    color: '#fff',
-  },
-  soundtabImage: {
-    width: 25,
-    height: 25,
-    resizeMode: 'contain',
+    backgroundColor: Colors.dark.background,
+    zIndex: 100,
   },
   row: {
     marginTop: 4,

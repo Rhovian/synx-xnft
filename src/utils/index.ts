@@ -1,8 +1,14 @@
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 
-import { FullScreenLoadingIndicator } from './components';
+import {
+  FullScreenLoadingIndicator,
+  HeaderRight,
+  HeaderLeft,
+  ItemSeparatorComponent,
+} from './components';
 import { getAccountFileInfo, transformStorageAccounts } from './files';
+import { FileInfo } from '../models';
 
 // get a user's associated token account
 export async function getTokenAccount(owner: PublicKey, mint: PublicKey): Promise<PublicKey> {
@@ -40,4 +46,33 @@ export function byteSizeUnited(n: number) {
     : (n / 1073741824).toFixed(0) + 'GB';
 }
 
-export { getAccountFileInfo, transformStorageAccounts, FullScreenLoadingIndicator };
+export function sortFileInfoArray(files: FileInfo[], input: string) {
+  return files.sort((a, b) => {
+    const aName = a.name.toLowerCase();
+    const bName = b.name.toLowerCase();
+    const inputName = input.toLowerCase();
+
+    if (aName.includes(inputName) && !bName.includes(inputName)) {
+      return -1; // a comes first
+    } else if (!aName.includes(inputName) && bName.includes(inputName)) {
+      return 1; // b comes first
+    } else {
+      return aName.localeCompare(bName); // sort by name alphabetically
+    }
+  });
+}
+
+export function shortenString(key: string) {
+  const firstFour = key.substr(0, 4);
+  const lastFour = key.substr(-4);
+  return `${firstFour}...${lastFour}`;
+}
+
+export {
+  getAccountFileInfo,
+  transformStorageAccounts,
+  FullScreenLoadingIndicator,
+  HeaderLeft,
+  HeaderRight,
+  ItemSeparatorComponent,
+};

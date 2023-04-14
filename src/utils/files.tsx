@@ -1,47 +1,66 @@
-import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import { StorageAccountResponse } from '@shadow-drive/sdk/dist/types';
-import React from 'react';
 
 import { humanFileSize } from '.';
+
+const getFileTypeAndIcon = (mimeType: string) => {
+  let fileType;
+
+  switch (mimeType) {
+    case 'image/jpeg':
+    case 'image/png':
+    case 'image/gif':
+    case 'image/svg+xml':
+      fileType = 'image';
+      break;
+    case 'video/mp4':
+    case 'video/quicktime':
+    case 'video/x-ms-wmv':
+    case 'video/x-msvideo':
+    case 'video/x-matroska':
+      fileType = 'video';
+      break;
+    case 'audio/mpeg':
+    case 'audio/x-wav':
+    case 'audio/x-aiff':
+    case 'audio/x-flac':
+      fileType = 'audio';
+      break;
+    case 'application/pdf':
+      fileType = 'pdf';
+      break;
+    case 'application/ppt':
+    case 'application/vnd.ms-powerpoint':
+    case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      fileType = 'ppt';
+      break;
+    case 'text/plain':
+    case 'text/tab-separated-values':
+      fileType = 'text';
+      break;
+    case 'text/csv':
+      fileType = 'csv';
+      break;
+    case 'application/zip':
+      fileType = 'zip';
+      break;
+    default:
+      fileType = 'unknown';
+  }
+
+  return fileType;
+};
 
 export const getAccountFileInfo = (res: Response, name: string, vault: string) => {
   const mimeType = res.headers.get('Content-Type');
   const size = res.headers.get('Content-Length');
 
-  let fileType;
-  let icon;
-
-  if (mimeType?.includes('image')) {
-    fileType = 'image';
-    icon = <MaterialCommunityIcons name="image" size={38} color="yellow" />;
-  } else if (mimeType?.includes('video')) {
-    fileType = 'video';
-    icon = <MaterialCommunityIcons name="video" size={38} color="green" />;
-  } else if (mimeType?.includes('audio')) {
-    fileType = 'audio';
-    icon = <MaterialCommunityIcons name="cast-audio-variant" size={38} color="white" />;
-  } else if (mimeType?.includes('text')) {
-    fileType = 'text';
-    icon = <MaterialCommunityIcons name="file-document" size={38} color="blue" />;
-  } else if (mimeType?.includes('application')) {
-    if (mimeType?.includes('octet')) {
-      icon = <AntDesign name="questioncircleo" size={38} color="red" />;
-      fileType = 'unknown';
-    } else {
-      fileType = 'application';
-      icon = <MaterialCommunityIcons name="application-cog" size={38} color="orange" />;
-    }
-  } else {
-    icon = <AntDesign name="questioncircleo" size={38} color="red" />;
-    fileType = 'unknown';
-  }
+  const fileType = getFileTypeAndIcon(mimeType || '');
 
   const hrsize = humanFileSize(parseInt(size!, 10));
   const body = res.url;
 
   return {
     fileType,
-    icon,
     name,
     size: hrsize,
     body,

@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { Balance } from '../components/Balance';
 // @ts-ignore
-import { RecentFiles } from '../components/RecentFiles';
+import { RecentFiles } from '../components/Recent/RecentFiles';
 import { Screen } from '../components/Screen';
 import { Colors } from '../constants/Colors';
 

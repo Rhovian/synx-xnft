@@ -30,21 +30,27 @@ export interface GlobalProvider {
   currentAccountFiles: any[];
   accountFiles: Record<string, any[]>;
   fileMenuOpen: boolean;
+  currentFile: FileInfo | undefined;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(account: PublicKey): Promise<void>;
   refreshCurrentAccountInfo(): Promise<StorageAccountInfo>;
   refreshCurrentAccountData(): Promise<void>;
   refreshCurrentAccountFiles(): Promise<string[]>;
-  createAccount(accountName: string, size: string): Promise<CreateStorageResponse>;
+  createAccount(
+    accountName: string,
+    size: string,
+    immutable: boolean
+  ): Promise<CreateStorageResponse>;
   uploadFile(file: any): Promise<void>;
   deleteCurrentAccount(): Promise<ShadowDriveResponse>;
   undeleteCurrentAccount(): Promise<ShadowDriveResponse>;
   resizeCurrentAccount(size: number, unit: string): Promise<ShadowDriveResponse>;
   deleteCurrentAccountFile(fileUrl: string): Promise<ShadowDriveResponse>;
-  refreshFiles(): Promise<void>;
   setFileMenu(file: FileInfo): void;
+  getAccountInfo(account: PublicKey): Promise<StorageAccountInfo>;
   setFileMenuOpen(open: boolean): void;
+  changeCurrentAccount(account: PublicKey): Promise<ShadowDriveResponse>;
 }
 // @ts-ignore
 export const GlobalContext = createContext<GlobalProvider>({});
@@ -100,15 +106,42 @@ export function GlobalProvider(props: any) {
   }, [drive]);
 
   useEffect(() => {
-    if (!currentAccount && accounts?.length) selectAccount(accounts[0].publicKey);
+    if (!currentAccount && accounts?.length) {
+      selectAccount(accounts[0].publicKey);
+      setCurrentAccount(accounts[0]);
+    }
   }, [accounts]);
 
   useEffect(() => {
-    refreshCurrentAccountData();
+    if (currentAccount) {
+      console.log('currentAccount', currentAccount);
+      refreshCurrentAccountData().catch((err) => console.log(err.toString()));
+    }
   }, [currentAccount]);
+
+  useEffect(() => {
+    if (accountFiles && currentAccount) {
+      console.log(accountFiles);
+      if (currentAccountFiles.length === 0) {
+        console.log(
+          currentAccount,
+          currentAccount.publicKey.toString(),
+          accountFiles[currentAccount.publicKey.toString()]
+        );
+        const files = accountFiles;
+        setCurrentAccountFiles(accountFiles[accounts[0].publicKey.toString()]);
+      }
+    }
+  }, [currentAccount, accountFiles]);
+
+  useEffect(() => {
+    console.log('Current Account Files', currentAccountFiles);
+  }, [currentAccountFiles]);
 
   async function refreshCurrentAccountData() {
     refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
+    /* TODO: should only refresh a the current account */
+    refreshAccounts().catch((err) => console.log(err.toString()));
   }
 
   function setFileMenu(file: FileInfo) {
@@ -125,7 +158,7 @@ export function GlobalProvider(props: any) {
 
   const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {
     const accountKey = account.publicKey.toString();
-    const accountFilesArray = await Promise.all(
+    return await Promise.all(
       files.keys.map(async (file) => {
         const res = await fetch(
           `https://shdw-drive.genesysgo.net/` + account.publicKey + '/' + file
@@ -134,10 +167,6 @@ export function GlobalProvider(props: any) {
         return getAccountFileInfo(res, file, accountKey);
       })
     );
-    setAccountFiles((prevAccountFiles) => ({
-      ...prevAccountFiles,
-      [accountKey]: accountFilesArray,
-    }));
   };
 
   async function refreshAccounts() {
@@ -150,6 +179,7 @@ export function GlobalProvider(props: any) {
 
       try {
         const accts = await drive.getStorageAccounts('v2').catch((err) => reject(err));
+        const accountsFiles: Record<string, any[]> = {};
 
         if (accts) {
           const filteredAccounts: StorageAccountResponse[] = [];
@@ -159,14 +189,22 @@ export function GlobalProvider(props: any) {
             const files = await drive.listObjects(new PublicKey(acct.publicKey));
             if (files.keys.length > 0) {
               filteredAccounts.push(acct);
-              getAccountFiles(acct, files);
+              const accountFiles = await getAccountFiles(acct, files);
+              accountsFiles[acct.publicKey.toString()] = accountFiles;
             }
           }
-          setAccounts(
-            accts.sort((a, b) =>
-              a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
-            )
-          );
+          try {
+            setAccounts(
+              filteredAccounts.sort((a, b) =>
+                a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase()
+                  ? 1
+                  : -1
+              )
+            );
+            setAccountFiles(accountsFiles);
+          } catch (e) {
+            console.log(e);
+          }
           resolve(accts);
         }
         setLoading(false);
@@ -180,31 +218,34 @@ export function GlobalProvider(props: any) {
     setCurrentAccount(accounts[accounts.map((a) => a.publicKey).indexOf(account)]);
   }
 
-  async function refreshCurrentAccountFiles() {
-    return new Promise<string[]>(async (resolve, reject) => {
-      if (!currentAccount?.publicKey) {
-        reject(new Error('current account is not set'));
-        return;
-      }
+  async function getAccountInfo() {
+    if (!drive) return;
 
-      if (!drive) {
-        reject(new Error('drive not initialized'));
-        return;
-      }
-
-      const fileGroup = await drive
-        .listObjects(new PublicKey(currentAccount.publicKey))
-        .catch((err) => reject(err));
-
-      if (fileGroup) {
-        const sortedKeys = fileGroup?.keys?.sort();
-        setCurrentAccountFiles(sortedKeys);
-        resolve(sortedKeys);
-      }
-    });
+    return await drive.getStorageAccount(new PublicKey(currentAccount!.publicKey));
   }
 
-  const refreshFiles = async () => {
+  /*
+  async function getAccountInfos() {
+    if (!drive) return;
+
+    const tempAccountInfos: any[] = [];
+
+    for await (const account of accounts) {
+      const info = await drive.getStorageAccount(new PublicKey(account.publicKey));
+      tempAccountInfos.push({ [account.publicKey.toString()]: info });
+    }
+
+    setAccountInfos((prevAccountInfos) => {
+      const newAccountInfos = { ...prevAccountInfos };
+      tempAccountInfos.forEach((tempInfo) => {
+        Object.assign(newAccountInfos, tempInfo);
+      });
+      return newAccountInfos;
+    });
+  }
+  */
+
+  const refreshCurrentAccountFiles = async () => {
     if (!drive) return;
     if (currentAccount) {
       const files = await drive.listObjects(new PublicKey(currentAccount.publicKey));
@@ -212,6 +253,22 @@ export function GlobalProvider(props: any) {
     }
   };
 
+  async function changeCurrentAccount(newAccount: PublicKey) {
+    if (!drive) return;
+
+    const newCurrentAccount = accounts.find(
+      (a) => a.publicKey.toString() === newAccount.toString()
+    );
+    if (!newCurrentAccount) return;
+    const newCurrentAccountFiles = accountFiles[newCurrentAccount.publicKey.toString()];
+    // @ts-ignore
+    setCurrentAccount(newCurrentAccount);
+    setCurrentAccountFiles(newCurrentAccountFiles);
+  }
+
+  /* 
+    TODO: add pubkey param and get the storage information for each account
+  */
   async function refreshCurrentAccountInfo() {
     return new Promise<StorageAccountInfo>(async (resolve, reject) => {
       if (!currentAccount?.publicKey) {
@@ -235,7 +292,7 @@ export function GlobalProvider(props: any) {
     });
   }
 
-  async function createAccount(accountName: string, size: string) {
+  async function createAccount(accountName: string, size: string, immutable: boolean) {
     return new Promise<CreateStorageResponse>(async (resolve, reject) => {
       if (!accountName?.trim()) {
         reject(new Error('a name must be specified'));
@@ -264,6 +321,10 @@ export function GlobalProvider(props: any) {
           (a) => a.publicKey.toString() === newAcct.shdw_bucket
         );
         if (foundAccount) selectAccount(foundAccount.publicKey);
+
+        if (immutable) {
+          await drive.makeStorageImmutable(new PublicKey(newAcct.shdw_bucket), 'v2');
+        }
       } catch (e) {
         console.log(e);
       }
@@ -273,11 +334,15 @@ export function GlobalProvider(props: any) {
   }
 
   const uploadFile = async (file: File | ShadowFile) => {
+    if (!drive) return;
+    if (!currentAccount) return;
     setLoading(true);
 
+    console.log(currentAccount?.publicKey, file);
     await drive?.uploadFile(currentAccount?.publicKey!, file);
 
-    await refreshFiles();
+    await refreshCurrentAccountFiles();
+    console.log('upload complete');
 
     setLoading(false);
   };
@@ -462,10 +527,12 @@ export function GlobalProvider(props: any) {
         deleteCurrentAccount,
         undeleteCurrentAccount,
         resizeCurrentAccount,
-        refreshFiles,
         deleteCurrentAccountFile,
         setFileMenu,
         setFileMenuOpen,
+        currentFile,
+        changeCurrentAccount,
+        getAccountInfo,
       }}>
       {props.children}
     </GlobalContext.Provider>

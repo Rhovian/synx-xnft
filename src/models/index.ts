@@ -15,7 +15,6 @@ export type File = {
 
 export type FileInfo = {
   fileType: string;
-  icon: JSX.Element;
   name: string;
   size: string;
   body: string;
