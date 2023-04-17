@@ -1,77 +1,23 @@
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD, REGULAR } from '../../constants';
 import { FileInfo } from '../../models';
+import { fileTypes } from '../../utils';
 // @ts-ignore
 export const PesonalFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
-  const fileTypeToImage = {
-    image: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/image-icon.png')}
-      />
-    ),
-    video: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/video-icon.png')}
-      />
-    ),
-    audio: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/audio-icon.png')}
-      />
-    ),
-    pdf: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/pdf-icon.png')}
-      />
-    ),
-    ppt: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/ppt-icon.png')}
-      />
-    ),
-    text: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/text-icon.png')}
-      />
-    ),
-    csv: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/xls-icon.png')}
-      />
-    ),
-    zip: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/zip-icon.png')}
-      />
-    ),
-    unknown: (
-      <Image
-        style={styles.image}
-        resizeMode="contain"
-        source={require('../../assets/html-icon.png')}
-      />
-    ),
+  const getFileTypeAndIcon = (fileType: string) => {
+    let source;
+    if (fileTypes.includes(fileType)) {
+      source = require(`../../assets/fileTypeIcons/${fileType.toLowerCase()}-icon.png`);
+    } else {
+      source = require('../../assets/fileTypeIcons/html-icon.png');
+    }
+
+    return <Image style={styles.image} resizeMode="contain" source={source} />;
   };
 
   const globalContext = useContext(GlobalContext);
@@ -84,7 +30,7 @@ export const PesonalFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
 
   return (
     <TouchableOpacity style={styles.container}>
-      <div style={styles.iconWrapper}>{fileTypeToImage[fileInfo.fileType]}</div>
+      <div style={styles.iconWrapper}>{getFileTypeAndIcon(fileInfo.fileType)}</div>
       <div style={styles.infoContainer}>
         <Text style={styles.name}>{fileInfo.name.slice(0, 16)}</Text>
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>

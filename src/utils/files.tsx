@@ -2,49 +2,42 @@ import { StorageAccountResponse } from '@shadow-drive/sdk/dist/types';
 
 import { humanFileSize } from '.';
 
-const getFileTypeAndIcon = (mimeType: string) => {
-  let fileType;
+export const fileTypes = [
+  'eps',
+  'html',
+  'wav',
+  'xls',
+  'pdf',
+  'png',
+  'dll',
+  'rar',
+  'txt',
+  'psd',
+  'avi',
+  'mov',
+  'javascript',
+  'mp3',
+  'mp4',
+  'jpg',
+  'zip',
+  'php',
+  'css',
+  'doc',
+  'ppt',
+];
 
-  switch (mimeType) {
-    case 'image/jpeg':
-    case 'image/png':
-    case 'image/gif':
-    case 'image/svg+xml':
-      fileType = 'image';
-      break;
-    case 'video/mp4':
-    case 'video/quicktime':
-    case 'video/x-ms-wmv':
-    case 'video/x-msvideo':
-    case 'video/x-matroska':
-      fileType = 'video';
-      break;
-    case 'audio/mpeg':
-    case 'audio/x-wav':
-    case 'audio/x-aiff':
-    case 'audio/x-flac':
-      fileType = 'audio';
-      break;
-    case 'application/pdf':
-      fileType = 'pdf';
-      break;
-    case 'application/ppt':
-    case 'application/vnd.ms-powerpoint':
-    case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-      fileType = 'ppt';
-      break;
-    case 'text/plain':
-    case 'text/tab-separated-values':
-      fileType = 'text';
-      break;
-    case 'text/csv':
-      fileType = 'csv';
-      break;
-    case 'application/zip':
-      fileType = 'zip';
-      break;
-    default:
-      fileType = 'unknown';
+const getFileTypeAndIcon = (mimeType: string) => {
+  const match = mimeType.match(/^.*\/(.+)$/);
+  const subtype = match ? match[1].toLowerCase() : '';
+
+  let fileType = fileTypes.find((type) => subtype.includes(type));
+
+  if (fileType === undefined) {
+    fileType = 'unknown';
+  }
+
+  if (fileType === 'mp4') {
+    fileType = 'mp3';
   }
 
   return fileType;

@@ -7,7 +7,7 @@ import {
   HeaderLeft,
   ItemSeparatorComponent,
 } from './components';
-import { getAccountFileInfo, transformStorageAccounts } from './files';
+import { getAccountFileInfo, transformStorageAccounts, fileTypes } from './files';
 import { FileInfo } from '../models';
 
 // get a user's associated token account
@@ -75,4 +75,5 @@ export {
   HeaderLeft,
   HeaderRight,
   ItemSeparatorComponent,
+  fileTypes,
 };

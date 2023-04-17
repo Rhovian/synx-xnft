@@ -7,8 +7,28 @@ import { GlobalContext } from '../GlobalProvider';
 import { Colors, BOLD, REGULAR } from '../constants';
 import { HeaderRight } from '../utils';
 
-/* TODO: need to get list of file types */
-const fileTypes = ['JPG', 'PNG', 'GIF', 'PDF'];
+const fileTypes = [
+  'EPS',
+  'HTML',
+  'WAV',
+  'XLS',
+  'PDF',
+  'PNG',
+  'DLL',
+  'RAR',
+  'TXT',
+  'PSD',
+  'AVI',
+  'MOV',
+  'JS',
+  'MP3',
+  'JPG',
+  'ZIP',
+  'PHP',
+  'CSS',
+  'DOC',
+  'PPT',
+];
 
 export const UploadFile = ({
   onBeginUpload,

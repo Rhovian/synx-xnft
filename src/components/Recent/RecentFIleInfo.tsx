@@ -10,7 +10,7 @@ export const RecentFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
 
   useEffect(() => {
     if (fileInfo) {
-      setFileIcon(require(`../../assets/${fileInfo.fileType}-icon.png`));
+      setFileIcon(require(`../../assets/fileTypeIcons/${fileInfo.fileType}-icon.png`));
     }
   }, [fileInfo]);
 
