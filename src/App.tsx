@@ -11,11 +11,12 @@ import { RecoilRoot } from 'recoil';
 
 import { GlobalProvider } from './GlobalProvider';
 import { Colors } from './constants';
+import FileSelector from './screens/FileSelector';
 import { Personal } from './screens/Personal';
 import { Recent } from './screens/Recent';
 import { Upload } from './screens/Upload';
 import './App.css';
-import { HeaderLeft, HeaderRight, HeaderRightTemp } from './utils';
+import { HeaderLeft, HeaderRight } from './utils';
 
 global.Buffer = global.Buffer || Buffer;
 
@@ -74,6 +75,17 @@ function TabNavigator() {
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Upload" />,
           headerTitle: '',
+        }}
+      />
+      <Tab.Screen
+        name="FileViewer"
+        component={FileSelector}
+        options={{
+          tabBarButton: () => null,
+          headerStyle: styles.headerStyle,
+          headerLeft: () => <HeaderLeft />,
+          headerRight: () => <HeaderRight title="Upload" />,
+          headerTitle: 'File Viewer',
         }}
       />
     </Tab.Navigator>

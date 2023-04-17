@@ -1,7 +1,7 @@
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext } from 'react';
-import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
 
 import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD, REGULAR } from '../../constants';
@@ -28,16 +28,24 @@ export const PesonalFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
     globalContext.setFileMenu(fileInfo);
   };
 
+  const goToFileViewer = () => {
+    globalContext.setFileMenu(fileInfo);
+    // @ts-ignore
+    navigation.navigate('FileViewer');
+  };
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={() => goToFileViewer()}>
       <div style={styles.iconWrapper}>{getFileTypeAndIcon(fileInfo.fileType)}</div>
       <div style={styles.infoContainer}>
         <Text style={styles.name}>{fileInfo.name.slice(0, 16)}</Text>
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>
       </div>
-      <TouchableOpacity style={styles.immutableButton} onPress={() => handlePress()}>
-        <Entypo name="dots-three-vertical" size={20} color="grey" />
-      </TouchableOpacity>
+      <View style={styles.immutableButton}>
+        <TouchableOpacity onPress={() => handlePress()}>
+          <Entypo name="dots-three-vertical" size={20} color="grey" />
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -50,7 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.innerBackground,
     minHeight: 50,
     borderRadius: 6,
-    zIndex: 10,
+    zIndex: 9,
   },
   iconWrapper: {
     paddingLeft: 8,
@@ -77,6 +85,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     textAlign: 'end',
     paddingRight: 12,
+    zIndex: 10,
   },
   image: {
     width: 30,
