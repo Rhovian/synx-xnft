@@ -15,6 +15,7 @@ export const fileTypes = [
   'psd',
   'avi',
   'mov',
+  'quicktime',
   'javascript',
   'mp3',
   'mp4',
@@ -40,12 +41,18 @@ const getFileTypeAndIcon = (mimeType: string) => {
     fileType = 'mp3';
   }
 
+  if (fileType === 'quicktime') {
+    fileType = 'mov';
+  }
+
   return fileType;
 };
 
 export const getAccountFileInfo = (res: Response, name: string, vault: string) => {
   const mimeType = res.headers.get('Content-Type');
   const size = res.headers.get('Content-Length');
+
+  console.log(name, mimeType);
 
   const fileType = getFileTypeAndIcon(mimeType || '');
 

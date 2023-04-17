@@ -12,16 +12,6 @@ export const RecentFiles = () => {
   const [files, setFiles] = useState<any>([]);
   const [loading, setLoading] = useState(true);
 
-  const removeValue = async () => {
-    try {
-      await AsyncStorage.removeItem('files');
-    } catch (e) {
-      // remove error
-    }
-
-    console.log('Done.');
-  };
-
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('files');
