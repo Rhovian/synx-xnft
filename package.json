@@ -13,6 +13,7 @@
     "@expo-google-fonts/dev": "*",
     "@expo/vector-icons": "^13.0.0",
     "@react-native-async-storage/async-storage": "^1.18.1",
+    "@react-native-clipboard/clipboard": "^1.11.2",
     "@react-native-community/slider": "^4.4.2",
     "@react-native/assets-registry": "^0.72.0",
     "@react-navigation/bottom-tabs": "^6.5.7",

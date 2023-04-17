@@ -10,10 +10,8 @@ import { FullScreenLoadingIndicator } from '../../utils';
 
 export const PersonalFiles = () => {
   const globalProvider = useContext(GlobalContext);
-  const [personalFiles, setPersonalFiles] = useState(true);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>([]);
-  const [showCreateVault, setShowCreateVault] = useState(false);
 
   useEffect(() => {
     if (globalProvider.currentAccountFiles && globalProvider.currentAccountFiles.length > 0) {
@@ -23,7 +21,6 @@ export const PersonalFiles = () => {
     } else {
       if (data.length > 0) {
         setLoading(false);
-        setPersonalFiles(false);
         setData([]);
       }
     }

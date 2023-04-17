@@ -21,7 +21,16 @@ export function FullScreenLoadingIndicator() {
 
 export const HeaderRight = ({ title }) => {
   return (
-    <div style={{ width: '100%' }}>
+    <div
+      style={{
+        width: '100vw',
+        position: 'absolute',
+        top: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 55,
+      }}>
       <Text
         style={{
           color: Colors.dark.text,

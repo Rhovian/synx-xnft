@@ -51,6 +51,7 @@ export interface GlobalProvider {
   getAccountInfo(account: PublicKey): Promise<StorageAccountInfo>;
   setFileMenuOpen(open: boolean): void;
   changeCurrentAccount(account: PublicKey): Promise<ShadowDriveResponse>;
+  getCurrentAccountFiles(): Promise<string[]>;
 }
 // @ts-ignore
 export const GlobalContext = createContext<GlobalProvider>({});
@@ -66,7 +67,7 @@ export function GlobalProvider(props: any) {
   const [filteredAccounts, setFilteredAccounts] = useState<StorageAccountResponse[]>([]);
   const [currentAccount, setCurrentAccount] = useState<StorageAccountResponse>();
   const [currentAccountInfo, setCurrentAccountInfo] = useState<StorageAccountInfo>();
-  const [currentAccountFiles, setCurrentAccountFiles] = useState<string[]>([]);
+  const [currentAccountFiles, setCurrentAccountFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [accountFiles, setAccountFiles] = useState<Record<string, any[]>>({});
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
@@ -114,7 +115,6 @@ export function GlobalProvider(props: any) {
 
   useEffect(() => {
     if (currentAccount) {
-      console.log(currentAccount.publicKey.toString());
       refreshCurrentAccountData().catch((err) => console.log(err.toString()));
     }
   }, [currentAccount]);
@@ -232,6 +232,8 @@ export function GlobalProvider(props: any) {
       ...prevState,
       [currentAccount.publicKey.toString()]: accountFiles,
     }));
+
+    setCurrentAccountFiles(accountFiles); // update currentAccountFiles state
   }
 
   async function refreshAccounts() {
@@ -536,6 +538,7 @@ export function GlobalProvider(props: any) {
         currentFile,
         changeCurrentAccount,
         getAccountInfo,
+        getCurrentAccountFiles,
       }}>
       {props.children}
     </GlobalContext.Provider>

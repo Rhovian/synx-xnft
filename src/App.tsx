@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useFonts } from '@expo-google-fonts/dev';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,7 +15,7 @@ import { Personal } from './screens/Personal';
 import { Recent } from './screens/Recent';
 import { Upload } from './screens/Upload';
 import './App.css';
-import { HeaderLeft, HeaderRight } from './utils';
+import { HeaderLeft, HeaderRight, HeaderRightTemp } from './utils';
 
 global.Buffer = global.Buffer || Buffer;
 
@@ -24,6 +24,14 @@ const Tab = createBottomTabNavigator();
 function TabNavigator() {
   const tabBarIcon = ({ color, size }: { color: string; size: number }) => (
     <MaterialCommunityIcons name="home" color={color} size={size} />
+  );
+
+  const folderBarIcon = ({ color, size }: { color: string; size: number }) => (
+    <MaterialIcons name="folder" color={color} size={size} />
+  );
+
+  const uploadIcon = ({ color, size }: { color: string; size: number }) => (
+    <FontAwesome name="cloud-upload" color={color} size={size} />
   );
 
   return (
@@ -43,26 +51,29 @@ function TabNavigator() {
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Recent" />,
+          headerTitle: '',
         }}
       />
       <Tab.Screen
         name="Personal"
         component={Personal}
         options={{
-          tabBarIcon,
+          tabBarIcon: folderBarIcon,
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Personal" />,
+          headerTitle: '',
         }}
       />
       <Tab.Screen
         name="Upload"
         component={Upload}
         options={{
-          tabBarIcon,
+          tabBarIcon: uploadIcon,
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Upload" />,
+          headerTitle: '',
         }}
       />
     </Tab.Navigator>
@@ -110,8 +121,13 @@ const styles = {
   headerStyle: {
     backgroundColor: Colors.dark.inputBackground,
     borderBottomColor: '#303030',
-    borderBottomWidth: 1,
     maxHeight: 55,
+  },
+  headerTitleStyle: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabBarStyle: {
     borderTopColor: Colors.dark.background,

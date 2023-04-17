@@ -1,17 +1,19 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
+import { PublicKey } from '@solana/web3.js';
 import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import { GlobalContext } from '../GlobalProvider';
-import { BOLD, Colors, MEDIUM } from '../constants';
+import { Colors, MEDIUM } from '../constants';
 import { FileInfo } from '../models';
 
 export function FileActionsMenu() {
   const globalContext = useContext(GlobalContext);
   const navigation = useNavigation();
-  const [file, setFile] = React.useState<any>(null);
+  const [file, setFile] = React.useState<FileInfo | null>(null);
 
   const handlePress = () => {
     globalContext.setFileMenuOpen(false);
@@ -25,7 +27,6 @@ export function FileActionsMenu() {
   }, [globalContext.currentFile]);
 
   const addToLocalStorage = async () => {
-    console.log('add to local storage');
     const data = await AsyncStorage.getItem('files');
     if (data) {
       const files = JSON.parse(data);
@@ -39,19 +40,37 @@ export function FileActionsMenu() {
   };
 
   const removeFromLocalStorage = async () => {
-    console.log('remove from local storage');
     const data = await AsyncStorage.getItem('files');
-    if (data) {
+    if (data && file) {
       const files = JSON.parse(data);
       const newFiles = files.filter((f: FileInfo) => f.name !== file.name);
       await AsyncStorage.setItem('files', JSON.stringify(newFiles));
-      console.log(await AsyncStorage.getItem('files'));
     }
   };
 
-  const handleCopy = () => {};
-  const handleBlock = () => {};
-  const handleDelete = () => {};
+  const handleCopy = () => {
+    if (file) {
+      Clipboard.setString(file.body);
+    }
+  };
+
+  const handleBlock = async () => {
+    if (file && globalContext.currentAccount) {
+      if (!globalContext.currentAccount.account.immutable) {
+        await globalContext.drive?.makeStorageImmutable(new PublicKey(file.vault), 'v2');
+      } else {
+        console.log('Account is already immutable');
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (file) {
+      removeFromLocalStorage();
+      await globalContext.drive?.deleteFile(new PublicKey(file.vault), file.body, 'v2');
+      await globalContext.getCurrentAccountFiles();
+    }
+  };
 
   return (
     <View style={styles.container}>
