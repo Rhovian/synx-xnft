@@ -10,7 +10,7 @@ import { CreateVault } from '../Vaults/CreateVault';
 export const VaultsView = () => {
   const globalContext = useContext(GlobalContext);
   const [openCreateVault, setOpenCreateVault] = useState(false);
-  const [vaults, setVaults] = useState<any>([globalContext.accounts]);
+  const [vaults, setVaults] = useState<any>([globalContext.filteredAccounts]);
   const [currentAccount, setCurrentAccount] = useState<any>([globalContext.currentAccount]);
   const [loading, setLoading] = useState(true);
 
@@ -21,16 +21,15 @@ export const VaultsView = () => {
   }, []);
 
   useEffect(() => {
-    if (globalContext.accounts.length !== 0) {
-      setVaults(globalContext.accounts);
+    if (globalContext.filteredAccounts.length !== 0) {
+      setVaults(globalContext.filteredAccounts);
       setOpenCreateVault(false);
       setLoading(false);
     }
-  }, [globalContext.accounts]);
+  }, [globalContext.filteredAccounts]);
 
   useEffect(() => {
     if (globalContext.currentAccount?.publicKey) {
-      console.log('current account in vaults view', globalContext.currentAccount);
       setCurrentAccount(shortenString(globalContext.currentAccount.publicKey.toString()));
     }
   }, [globalContext.currentAccount]);

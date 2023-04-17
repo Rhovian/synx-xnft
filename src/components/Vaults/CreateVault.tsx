@@ -18,10 +18,10 @@ import { BOLD, REGULAR, Colors, MEDIUM } from '../../constants';
 const windowHeight = Dimensions.get('window').height;
 
 // @ts-ignore
-export function CreateVault() {
+export function CreateVault({ exitVault }: { exitVault: () => void }) {
   const [vaultName, setVaultName] = useState('');
   const [vaultSize, setVaultSize] = useState('');
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const [immutable, setImmutable] = useState(false);
 
@@ -52,7 +52,14 @@ export function CreateVault() {
         setDropdown(false);
       }}>
       <View style={styles.container}>
-        <View style={{ width: '100%', height: '80%', marginTop: 16 }}>
+        <TouchableOpacity style={styles.exitVault} onPress={() => exitVault()}>
+          <Image
+            style={styles.close}
+            resizeMode="contain"
+            source={require('../../assets/close.png')}
+          />
+        </TouchableOpacity>
+        <View style={{ width: '100%', height: '80%', marginTop: 8 }}>
           <View style={{ width: '100%', alignItems: 'center' }}>
             <View style={{ width: '100%' }}>
               <View>
@@ -593,5 +600,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     margin: 0,
+  },
+  exitVault: {
+    position: 'absolute',
+    right: 25,
+    top: -15,
+    fontSize: 18,
+    color: Colors.dark.text,
+    fontFamily: BOLD,
+    zIndex: 100,
+  },
+  close: {
+    width: 15,
+    height: 15,
+    marginTop: 15,
+    marginRight: 2,
   },
 });

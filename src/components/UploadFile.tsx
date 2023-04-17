@@ -1,12 +1,14 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
 import { FileUploader } from 'react-drag-drop-files';
 import { View, StyleSheet, Image, Text } from 'react-native';
 
 import { GlobalContext } from '../GlobalProvider';
 import { Colors, BOLD, REGULAR } from '../constants';
+import { HeaderRight } from '../utils';
 
 /* TODO: need to get list of file types */
-const fileTypes = ['JPG', 'PNG', 'GIF'];
+const fileTypes = ['JPG', 'PNG', 'GIF', 'PDF'];
 
 export const UploadFile = ({
   onBeginUpload,
@@ -18,11 +20,16 @@ export const UploadFile = ({
   const globalProvider = useContext(GlobalContext);
   const [file, setFile] = useState(null);
 
+  const navigation = useNavigation();
+
   const handleChange = async (file: any) => {
     onBeginUpload();
+    navigation.setOptions({ headerRight: () => <HeaderRight title="Uploading..." /> });
+
     setFile(file);
     await globalProvider.uploadFile(file);
     onEndUpload();
+    navigation.setOptions({ headerRight: () => <HeaderRight title="Upload" /> });
   };
 
   useEffect(() => {

@@ -10,26 +10,38 @@ import { UploadFile } from '../components/UploadFile';
 import { UploadPending } from '../components/UploadPending';
 import { CreateVault } from '../components/Vaults/CreateVault';
 import { Colors } from '../constants/Colors';
+import { FullScreenLoadingIndicator } from '../utils';
 
 export const Upload = () => {
   const [uploading, setUploading] = React.useState(false);
-  const [newUser, setNewUser] = React.useState(true);
+  const [newUser, setNewUser] = React.useState(false);
   const [showCreateVault, setShowCreateVault] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   const globalContext = useContext(GlobalContext);
 
   useEffect(() => {
-    console.log(globalContext.currentAccount);
-    if (globalContext.currentAccount) {
+    if (globalContext.accounts.length === 0) {
+      setNewUser(true);
+    } else {
       setNewUser(false);
     }
+  }, [globalContext.accounts]);
+
+  useEffect(() => {
+    if (globalContext.currentAccount) {
+      setLoading(false);
+    }
   }, [globalContext.currentAccount]);
+
   // const navigation = useNavigation();
   // navigation.setOptions({ tabBarStyle: { display: 'none' } });
   return (
     <Screen style={styles.container}>
       <Balance />
-      {newUser ? (
+      {loading ? (
+        <FullScreenLoadingIndicator />
+      ) : newUser ? (
         showCreateVault ? (
           <View style={styles.createVaultContainer}>
             <CreateVault />
@@ -42,13 +54,14 @@ export const Upload = () => {
             />
           </View>
         )
+      ) : uploading ? (
+        <UploadPending />
       ) : (
         <UploadFile
           onBeginUpload={() => setUploading(true)}
           onEndUpload={() => setUploading(false)}
         />
       )}
-      {uploading ? <UploadPending /> : <div />}
     </Screen>
   );
 };

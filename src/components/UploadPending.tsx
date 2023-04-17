@@ -1,13 +1,9 @@
-import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
 import { Colors, MEDIUM } from '../constants';
-import { HeaderRight } from '../utils';
 
 export const UploadPending = () => {
-  const navigation = useNavigation();
-  navigation.setOptions({ headerRight: () => <HeaderRight title="Uploading..." /> });
   return (
     <View style={styles.container}>
       <Image source={require('../assets/upload-cloud.png')} style={styles.image} />

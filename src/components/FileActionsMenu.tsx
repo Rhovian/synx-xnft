@@ -49,6 +49,10 @@ export function FileActionsMenu() {
     }
   };
 
+  const handleCopy = () => {};
+  const handleBlock = () => {};
+  const handleDelete = () => {};
+
   return (
     <View style={styles.container}>
       <View style={styles.actionsHeader}>
@@ -66,49 +70,21 @@ export function FileActionsMenu() {
               source={require('../assets/pin-icon.png')}
             />
           </TouchableOpacity>
-          <TouchableOpacity >
-            <Image
-              style={styles.actionIcon}
-              resizeMode="contain"
-              source={require('../assets/share-icon.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => handleCopy()}>
             <Image
               style={styles.actionIcon}
               resizeMode="contain"
               source={require('../assets/copy-icon.png')}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => handleBlock()}>
             <Image
               style={styles.actionIcon}
               resizeMode="contain"
               source={require('../assets/block-icon.png')}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Image
-              style={styles.actionIcon}
-              resizeMode="contain"
-              source={require('../assets/offline-icon.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image
-              style={styles.actionIcon}
-              resizeMode="contain"
-              source={require('../assets/details-icon.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image
-              style={styles.actionIcon}
-              resizeMode="contain"
-              source={require('../assets/rename-icon.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDelete()}>
             <Image
               style={styles.actionIcon}
               resizeMode="contain"
@@ -123,7 +99,7 @@ export function FileActionsMenu() {
 
 const styles = StyleSheet.create({
   container: {
-    height: '35vh',
+    height: '25vh',
     width: '100vw',
     backgroundColor: Colors.dark.inputBackground,
     borderTopLeftRadius: 16,

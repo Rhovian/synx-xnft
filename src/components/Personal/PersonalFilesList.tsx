@@ -1,4 +1,5 @@
 import { MaterialIcons, Feather, Entypo } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -9,6 +10,8 @@ import { GlobalContext } from '../../GlobalProvider';
 import { BOLD, Colors, MEDIUM, REGULAR } from '../../constants';
 import { FileInfo } from '../../models';
 import { sortFileInfoArray, ItemSeparatorComponent, FullScreenLoadingIndicator } from '../../utils';
+import { EmptyFiles } from '../EmptyFiles';
+import { CreateVault } from '../Vaults/CreateVault';
 import { VaultsView } from '../Vaults/VaultsView';
 
 export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
@@ -28,11 +31,23 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
   const [fileSelected, setFileSelected] = useState(null);
   const [open, setOpen] = useState(false);
   const [showCreateVault, setShowCreateVault] = useState(false);
+  const [showVaultsView, setShowVaultsView] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [sortedData, setSortedData] = useState(data);
-  const globalContext = useContext(GlobalContext);
+  const globalProvider = useContext(GlobalContext);
   const [displayClose, setDisplayClose] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showEmptyFiles, setShowEmptyFiles] = useState(false);
+
+  useEffect(() => {
+    if (globalProvider.currentAccountFiles) {
+      if (data.length === 0) {
+        setShowEmptyFiles(true);
+      } else {
+        setShowEmptyFiles(false);
+      }
+    }
+  }, [data]);
 
   useEffect(() => {
     // Filter by file type if fileSelected is not null
@@ -57,10 +72,10 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
   }, [data, fileSelected, searchValue]);
 
   useEffect(() => {
-    if (globalContext.accounts.length !== 0) {
+    if (globalProvider.accounts.length !== 0) {
       setDisplayClose(true);
     }
-  }, [globalContext.accounts]);
+  }, [globalProvider.accounts]);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -69,84 +84,100 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
   }, [data]);
 
   const showVaultView = () => {
-    setShowCreateVault(true);
+    setShowVaultsView(true);
   };
 
   const closeVaultView = () => {
-    setShowCreateVault(false);
+    setShowVaultsView(false);
   };
+
+  useIsFocused();
 
   return (
     <View style={styles.container}>
-      {showCreateVault ? (
+      {showVaultsView ? (
         <div style={styles.vaultsViewWrap}>
           <VaultsView />
           {displayClose ? (
-            <TouchableOpacity style={styles.exitVault} onPress={closeVaultView}>
-              <Image
-                style={styles.close}
-                resizeMode="contain"
-                source={require('../../assets/close.png')}
-              />
-            </TouchableOpacity>
+            showCreateVault ? (
+              <div />
+            ) : (
+              <TouchableOpacity style={styles.exitVault} onPress={closeVaultView}>
+                <Image
+                  style={styles.close}
+                  resizeMode="contain"
+                  source={require('../../assets/close.png')}
+                />
+              </TouchableOpacity>
+            )
           ) : (
             <div />
           )}
         </div>
       ) : (
         <div style={styles.appContainer}>
-          <View style={styles.sortContainer}>
-            <TextInput
-              placeholder="Search Files"
-              value={searchValue}
-              onChangeText={setSearchValue}
-              style={styles.inputStyles}
-            />
-            <View style={styles.dropDownContainer}>
-              <DropDownPicker
-                open={open}
-                setOpen={setOpen}
-                style={styles.dropdown}
-                textStyle={{ color: '#949494', fontFamily: MEDIUM, fontSize: 14 }}
-                value={fileSelected}
-                setValue={setFileSelected}
-                items={files}
-                setItems={setFiles}
-                placeholder="Sorted by type"
-                zIndex={1000}
-                dropDownDirection="BOTTOM"
-                dropDownContainerStyle={styles.dropDownOptions}
-                arrowIconContainerStyle={{
-                  marginLeft: 3,
-                }}
-                ArrowDownIconComponent={({ style }) => (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color={Colors.dark.greyText}
-                  />
-                )}
+          {showCreateVault ? (
+            <div />
+          ) : (
+            <View style={styles.sortContainer}>
+              <TextInput
+                placeholder="Search Files"
+                value={searchValue}
+                onChangeText={setSearchValue}
+                style={styles.inputStyles}
               />
-              <View style={styles.viewContainer}>
-                <TouchableOpacity style={styles.view}>
-                  <Feather name="list" size={22} color={Colors.dark.greyText} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.view}>
-                  <Entypo name="grid" size={24} color={Colors.dark.greyText} />
+              <View style={styles.dropDownContainer}>
+                <DropDownPicker
+                  open={open}
+                  setOpen={setOpen}
+                  style={styles.dropdown}
+                  textStyle={{ color: '#949494', fontFamily: MEDIUM, fontSize: 14 }}
+                  value={fileSelected}
+                  setValue={setFileSelected}
+                  items={files}
+                  setItems={setFiles}
+                  placeholder="Sorted by type"
+                  zIndex={1000}
+                  dropDownDirection="BOTTOM"
+                  dropDownContainerStyle={styles.dropDownOptions}
+                  arrowIconContainerStyle={{
+                    marginLeft: 3,
+                  }}
+                  ArrowDownIconComponent={({ style }) => (
+                    <MaterialIcons
+                      name="keyboard-arrow-down"
+                      size={20}
+                      color={Colors.dark.greyText}
+                    />
+                  )}
+                />
+                <View style={styles.viewContainer}>
+                  <TouchableOpacity style={styles.view}>
+                    <Feather name="list" size={22} color={Colors.dark.greyText} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.view}>
+                    <Entypo name="grid" size={24} color={Colors.dark.greyText} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.createVaultIconWrap}>
+                <TouchableOpacity style={styles.view} onPress={showVaultView}>
+                  <Image
+                    style={styles.creatVaultIcon}
+                    source={require('../../assets/create-vault-icon.png')}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.createVaultIconWrap}>
-              <TouchableOpacity style={styles.view} onPress={showVaultView}>
-                <Image
-                  style={styles.creatVaultIcon}
-                  source={require('../../assets/create-vault-icon.png')}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+          )}
           {loading ? (
             <FullScreenLoadingIndicator />
+          ) : showEmptyFiles ? (
+            showCreateVault ? (
+              <CreateVault exitVault={() => setShowCreateVault(false)} />
+            ) : (
+              <EmptyFiles showCreateVault={() => setShowCreateVault(true)} />
+            )
           ) : (
             <FlatList
               style={styles.listContainer}
@@ -271,7 +302,7 @@ const styles = StyleSheet.create({
   exitVault: {
     position: 'absolute',
     right: 25,
-    top: 20,
+    top: 40,
     fontSize: 18,
     color: Colors.dark.text,
     fontFamily: BOLD,

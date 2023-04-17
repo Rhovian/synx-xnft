@@ -4,22 +4,27 @@ import { View, StyleSheet } from 'react-native';
 import { PersonalFilesList } from './PersonalFilesList';
 import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD } from '../../constants';
-import { tempData } from '../../temp';
 import { FullScreenLoadingIndicator } from '../../utils';
-import { EmptyFiles } from '../EmptyFiles';
+
+//Add this line to tell the function that it's in focuse
 
 export const PersonalFiles = () => {
   const globalProvider = useContext(GlobalContext);
   const [personalFiles, setPersonalFiles] = useState(true);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>([]);
+  const [showCreateVault, setShowCreateVault] = useState(false);
 
   useEffect(() => {
-    if (globalProvider.currentAccountFiles) {
-      console.log('current files in personal files', globalProvider.currentAccountFiles);
+    if (globalProvider.currentAccountFiles && globalProvider.currentAccountFiles.length > 0) {
+      console.log('here is a hook for the current account files!');
       setData(globalProvider.currentAccountFiles);
       setLoading(false);
-      if (globalProvider.currentAccountFiles.length === 0) {
+    } else {
+      if (data.length > 0) {
+        setLoading(false);
+        setPersonalFiles(false);
+        setData([]);
       }
     }
   }, [globalProvider.currentAccountFiles]);
@@ -40,10 +45,8 @@ export const PersonalFiles = () => {
               }}>
               <FullScreenLoadingIndicator />
             </View>
-          ) : personalFiles ? (
-            <PersonalFilesList data={data} />
           ) : (
-            <EmptyFiles />
+            <PersonalFilesList data={data} />
           )}
         </View>
       </View>
@@ -85,5 +88,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     width: '100%',
     maxHeight: 450,
+  },
+  emptyFilesContainer: {
+    marginTop: 20,
+    width: '100%',
+    height: '100%',
+    minHeight: 200,
+    maxHeight: 400,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
 });
