@@ -17,13 +17,17 @@ export const Personal = () => {
   const [firstVisit, setFirstVisit] = React.useState(false);
   const globalContext = useContext(GlobalContext);
 
-  const visited = localStorage.getItem('visited');
-  if (!visited) {
-    if (!visited) {
+  useEffect(() => {
+    if (globalContext.firstVisit) {
       setFirstVisit(true);
-      localStorage.setItem('visited', 'true');
+      navigation.setOptions({
+        tabBarStyle: { display: 'none' },
+        headerShown: false,
+      });
+    } else {
+      setFirstVisit(false);
     }
-  }
+  }, [globalContext.firstVisit]);
 
   const handlePress = () => {
     setFirstVisit(false);
@@ -31,6 +35,7 @@ export const Personal = () => {
       tabBarStyle: { display: 'flex', borderTop: 'none' },
       headerShown: true,
     });
+    globalContext.setVisited();
   };
 
   useEffect(() => {

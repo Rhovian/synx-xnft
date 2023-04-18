@@ -34,6 +34,7 @@ export interface GlobalProvider {
   fileMenuOpen: boolean;
   progressBar: number;
   noAccounts: boolean;
+  firstVisit: boolean;
   currentFile: FileInfo | undefined;
   localFiles: FileInfo[] | undefined;
   setLocalFiles(files: FileInfo[]): void;
@@ -42,6 +43,7 @@ export interface GlobalProvider {
   selectAccount(account: PublicKey): Promise<void>;
   refreshCurrentAccountInfo(): Promise<StorageAccountInfo>;
   refreshCurrentAccountData(): Promise<void>;
+  setVisited(): void;
   createAccount(
     accountName: string,
     size: string,
@@ -81,6 +83,7 @@ export function GlobalProvider(props: any) {
   const [progressBar, setProgressBar] = useState(0);
   const [noAccounts, setNoAccounts] = useState(false);
   const [localFiles, setLocalFiles] = useState<FileInfo[] | null>([]);
+  const [firstVisit, setFirstVisit] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -91,7 +94,7 @@ export function GlobalProvider(props: any) {
         signAllTransactions: async (txs: Transaction[]) => {
           return window.xnft.solana.signAllTransactions(txs);
         },
-        signMessage(msg: any) {
+        signMessage: async (msg: any) => {
           return window.xnft.solana.signMessage(msg);
         },
         publicKey: new PublicKey(wallet),
@@ -101,9 +104,26 @@ export function GlobalProvider(props: any) {
 
       // get local files
       const files = await AsyncStorage.getItem('files');
+      const firstVisit = await AsyncStorage.getItem('visit');
 
       if (files) {
         setLocalFiles(JSON.parse(files));
+      }
+
+      if (!firstVisit) {
+        const visit: Record<string, boolean> = {
+          [wallet.toString()]: false,
+        };
+        await AsyncStorage.setItem('visit', JSON.stringify(visit));
+      } else {
+        const visit: Record<string, boolean> = JSON.parse(firstVisit);
+        const walletString = wallet.toString();
+        if (!visit[walletString]) {
+          visit[walletString] = true;
+          await AsyncStorage.setItem('visit', JSON.stringify(visit));
+        } else {
+          setFirstVisit(false);
+        }
       }
     })();
   }, [wallet]);
@@ -155,6 +175,20 @@ export function GlobalProvider(props: any) {
       }
     }
   }, [accountFiles]);
+
+  async function setVisited() {
+    const firstVisit = await AsyncStorage.getItem('visit');
+    if (firstVisit) {
+      const visit: Record<string, boolean> = JSON.parse(firstVisit);
+      const walletString = wallet.toString();
+      console.log('here1', visit[walletString]);
+      if (visit[walletString]) {
+        console.log('here2');
+        visit[walletString] = false;
+        await AsyncStorage.setItem('visit', JSON.stringify(visit));
+      }
+    }
+  }
 
   async function refreshCurrentAccountData() {
     refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
@@ -573,6 +607,9 @@ export function GlobalProvider(props: any) {
         noAccounts,
         localFiles,
         setLocalFiles,
+        firstVisit,
+        setFirstVisit,
+        setVisited,
       }}>
       {props.children}
     </GlobalContext.Provider>
