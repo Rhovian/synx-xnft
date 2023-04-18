@@ -22,6 +22,7 @@ const fileTypes = [
   'MOV',
   'JS',
   'MP3',
+  'MP4',
   'JPG',
   'ZIP',
   'PHP',

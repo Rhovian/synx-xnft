@@ -4,7 +4,8 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
 import { PublicKey } from '@solana/web3.js';
 import React, { useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 import { GlobalContext } from '../GlobalProvider';
 import { Colors, MEDIUM } from '../constants';
@@ -53,6 +54,13 @@ export function FileActionsMenu() {
   };
 
   const handleBlock = async () => {
+    if (globalContext.currentAccount?.account.immutable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Storage is already immutable',
+      });
+      return;
+    }
     if (file && globalContext.currentAccount) {
       if (!globalContext.currentAccount.account.immutable) {
         await globalContext.drive?.makeStorageImmutable(new PublicKey(file.vault), 'v2');
@@ -63,6 +71,14 @@ export function FileActionsMenu() {
   };
 
   const handleDelete = async () => {
+    if (globalContext.currentAccount?.account.immutable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Cannot Delete File',
+        text2: 'Vault is immutable',
+      });
+      return;
+    }
     if (file) {
       removeFromLocalStorage();
       await globalContext.drive?.deleteFile(new PublicKey(file.vault), file.body, 'v2');

@@ -6,7 +6,7 @@ import { Colors, MEDIUM } from '../constants';
 export const UploadPending = () => {
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/upload-cloud.png')} style={styles.image} />
+      <Image source={require('../assets/upload-gif.gif')} style={styles.image} />
     </View>
   );
 };

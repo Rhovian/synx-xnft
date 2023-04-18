@@ -7,6 +7,7 @@ import { Buffer } from 'buffer';
 import { registerRootComponent } from 'expo';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { RecoilRoot } from 'recoil';
 
 import { GlobalProvider } from './GlobalProvider';
@@ -60,6 +61,7 @@ function TabNavigator() {
         component={Personal}
         options={{
           tabBarIcon: folderBarIcon,
+          tabBarLabel: 'files',
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Personal" />,
@@ -123,6 +125,7 @@ function App() {
       <GlobalProvider>
         <NavigationContainer>
           <HomeStackScreen />
+          <Toast />
         </NavigationContainer>
       </GlobalProvider>
     </RecoilRoot>

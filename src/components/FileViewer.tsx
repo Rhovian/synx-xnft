@@ -16,7 +16,6 @@ const FileViewer = ({ file }: { file: FileInfo }) => {
 
     await sound.playAsync();
   }
-  console.log(file);
 
   useEffect(() => {
     if (file)

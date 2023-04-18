@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { GlobalContext } from '../GlobalProvider';
@@ -10,6 +10,7 @@ import { Intro } from '../components/Intro';
 import { PersonalFiles } from '../components/Personal/PersonalFiles';
 import { Screen } from '../components/Screen';
 import { Colors } from '../constants/Colors';
+import { HeaderRight } from '../utils';
 
 export const Personal = () => {
   const navigation = useNavigation();
@@ -31,6 +32,19 @@ export const Personal = () => {
       headerShown: true,
     });
   };
+
+  useEffect(() => {
+    if (globalContext.currentAccountInfo) {
+      navigation.setOptions({
+        headerRight: () => <HeaderRight title={globalContext.currentAccountInfo.identifier} />,
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: () => <HeaderRight title="" />,
+      });
+    }
+  }, [globalContext.currentAccountInfo]);
+
   return (
     <Screen style={styles.container}>
       {firstVisit ? (
