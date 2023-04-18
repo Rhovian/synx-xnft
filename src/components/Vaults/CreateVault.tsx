@@ -32,6 +32,7 @@ export function CreateVault({ exitVault }: { exitVault: () => void }) {
   const triggerCreateVault = async () => {
     if (vaultName !== '' && vaultSize !== '') {
       setLoader(true);
+      globalContext.setProgressBar(0.2);
       /** Create the vault here */
       const newAccount = await globalContext
         .createAccount(vaultName, vaultSize.replaceAll(' ', ''), immutable)
@@ -41,8 +42,14 @@ export function CreateVault({ exitVault }: { exitVault: () => void }) {
 
       if (newAccount) {
         globalContext.refreshAccounts();
+        globalContext.setProgressBar(0.9);
       }
+      globalContext.setProgressBar(1);
       setLoader(false);
+
+      exitVault();
+
+      globalContext.setProgressBar(0);
     }
   };
   return (
@@ -520,7 +527,7 @@ export function CreateVault({ exitVault }: { exitVault: () => void }) {
               </View>
             ) : (
               <TouchableOpacity
-                onPress={() => triggerCreateVault()}
+                onPress={async () => await triggerCreateVault()}
                 style={{
                   marginTop: 40,
                   width: '100%',

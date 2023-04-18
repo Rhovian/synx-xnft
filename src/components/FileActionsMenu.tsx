@@ -47,6 +47,8 @@ export function FileActionsMenu() {
       type: 'success',
       text1: 'File saved!',
     });
+    const newData = await AsyncStorage.getItem('files');
+    if (newData) globalContext.setLocalFiles(JSON.parse(newData));
   };
 
   const removeFromLocalStorage = async () => {
@@ -55,6 +57,7 @@ export function FileActionsMenu() {
       const files = JSON.parse(data);
       const newFiles = files.filter((f: FileInfo) => f.name !== file.name);
       await AsyncStorage.setItem('files', JSON.stringify(newFiles));
+      globalContext.setLocalFiles(newFiles);
     }
   };
 
@@ -78,7 +81,13 @@ export function FileActionsMenu() {
     }
     if (file && globalContext.currentAccount) {
       if (!globalContext.currentAccount.account.immutable) {
+        globalContext.setProgressBar(0.4);
         await globalContext.drive?.makeStorageImmutable(new PublicKey(file.vault), 'v2');
+        globalContext.setProgressBar(1);
+        Toast.show({
+          type: 'success',
+          text1: 'Storage is now immutable',
+        });
       } else {
         console.log('Account is already immutable');
       }
@@ -96,9 +105,13 @@ export function FileActionsMenu() {
     }
     if (file) {
       try {
+        globalContext.setProgressBar(0.2);
         removeFromLocalStorage();
         await globalContext.drive?.deleteFile(new PublicKey(file.vault), file.body, 'v2');
+        globalContext.setProgressBar(0.4);
+
         await globalContext.getCurrentAccountFiles();
+        globalContext.setProgressBar(0.8);
       } catch {
         Toast.show({
           type: 'error',
@@ -110,6 +123,12 @@ export function FileActionsMenu() {
         text1: 'File deleted from vault',
         text2: 'File removed from local storage',
       });
+      globalContext.setProgressBar(1);
+
+      setTimeout(() => {
+        globalContext.setProgressBar(0);
+        globalContext.setFileMenuOpen(false);
+      }, 1000);
     }
   };
 

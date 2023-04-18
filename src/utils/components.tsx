@@ -3,14 +3,14 @@ import { View, ActivityIndicator, Text, Image } from 'react-native';
 
 import { BOLD, Colors } from '../constants';
 
-export function FullScreenLoadingIndicator() {
+export function FullScreenLoadingIndicator({ variantBackground }: { variantBackground?: boolean }) {
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: Colors.dark.background,
+        backgroundColor: variantBackground ? Colors.dark.innerBackground : Colors.dark.background,
       }}>
       <ActivityIndicator color="#eee" />
     </View>

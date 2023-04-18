@@ -61,7 +61,7 @@ function TabNavigator() {
         component={Personal}
         options={{
           tabBarIcon: folderBarIcon,
-          tabBarLabel: 'files',
+          tabBarLabel: 'Files',
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight title="Personal" />,

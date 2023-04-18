@@ -16,6 +16,13 @@ export const PersonalFiles = () => {
   );
 
   useEffect(() => {
+    if (globalProvider.noAccounts) {
+      // new wallets, pass through to child render for vault creation
+      setLoading(false);
+    }
+  }, [globalProvider.noAccounts]);
+
+  useEffect(() => {
     if (globalProvider.currentAccount) {
       setCurrentAccount(globalProvider.currentAccount);
     }
@@ -33,10 +40,8 @@ export const PersonalFiles = () => {
       if (data !== globalProvider.currentAccountFiles) setData(globalProvider.currentAccountFiles);
       setLoading(false);
     } else {
-      if (data.length > 0) {
-        setLoading(false);
-        setData([]);
-      }
+      setLoading(false);
+      setData([]);
     }
   }, [globalProvider.currentAccountFiles]);
 

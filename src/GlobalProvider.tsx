@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ShdwDrive,
   StorageAccountResponse,
@@ -32,7 +33,10 @@ export interface GlobalProvider {
   accountFiles: Record<string, any[]>;
   fileMenuOpen: boolean;
   progressBar: number;
+  noAccounts: boolean;
   currentFile: FileInfo | undefined;
+  localFiles: FileInfo[] | undefined;
+  setLocalFiles(files: FileInfo[]): void;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(account: PublicKey): Promise<void>;
@@ -75,6 +79,8 @@ export function GlobalProvider(props: any) {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<FileInfo>();
   const [progressBar, setProgressBar] = useState(0);
+  const [noAccounts, setNoAccounts] = useState(false);
+  const [localFiles, setLocalFiles] = useState<FileInfo[] | null>([]);
 
   useEffect(() => {
     (async () => {
@@ -92,6 +98,13 @@ export function GlobalProvider(props: any) {
       }).init();
 
       setDrive(shdwDrive);
+
+      // get local files
+      const files = await AsyncStorage.getItem('files');
+
+      if (files) {
+        setLocalFiles(JSON.parse(files));
+      }
     })();
   }, [wallet]);
 
@@ -113,7 +126,9 @@ export function GlobalProvider(props: any) {
   useEffect(() => {
     if (!currentAccount && accounts?.length) {
       selectCurrentAccount().catch((err) => console.log(err.toString()));
-      getAllAccountFiles().catch((err) => console.log(err.toString()));
+      if (accounts.length > 1) {
+        getAllAccountFiles().catch((err) => console.log(err.toString()));
+      }
     }
   }, [accounts]);
 
@@ -206,7 +221,7 @@ export function GlobalProvider(props: any) {
 
     let account: StorageAccountResponse | undefined;
 
-    for await (const acct of accounts) {
+    for await (const [i, acct] of accounts.entries()) {
       // get files
       const files = await drive.listObjects(new PublicKey(acct.publicKey));
       if (files.keys.length > 0) {
@@ -217,6 +232,10 @@ export function GlobalProvider(props: any) {
         }));
         account = acct;
         break; // exit the loop if files have been found
+      } else {
+        if (i === accounts.length - 1)
+          // there is no account with files, set it manually
+          account = accounts[0];
       }
     }
 
@@ -240,19 +259,22 @@ export function GlobalProvider(props: any) {
   }
 
   async function refreshAccounts() {
-    return new Promise<StorageAccountResponse[]>(async (resolve, reject) => {
-      if (!drive) return;
+    if (!drive) return;
 
-      const accts = await drive.getStorageAccounts('v2').catch((err) => reject(err));
+    const accts: StorageAccountResponse[] = await drive.getStorageAccounts('v2');
 
-      if (accts) {
-        setAccounts(
-          accts.sort((a, b) =>
-            a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
-          )
-        );
-      }
-    });
+    if (accts.length > 0) {
+      setAccounts(
+        accts.sort((a, b) =>
+          a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
+        )
+      );
+    } else {
+      // new to shadow drive
+      setNoAccounts(true);
+    }
+
+    return accts;
   }
 
   async function selectAccount(account: PublicKey) {
@@ -322,16 +344,23 @@ export function GlobalProvider(props: any) {
 
       const newAcct = await drive
         .createStorageAccount(accountName, size, 'v2')
-        .catch((err) => reject(err));
+        .catch((err) => console.log(err));
 
       if (!newAcct) return;
 
+      const confirmedTransaction = await connection.confirmTransaction(
+        newAcct.transaction_signature,
+        'confirmed'
+      );
+
+      setProgressBar(0.5);
       try {
         const refreshedAccounts = await refreshAccounts();
 
-        const foundAccount = refreshedAccounts.find(
+        const foundAccount = refreshedAccounts?.find(
           (a) => a.publicKey.toString() === newAcct.shdw_bucket
         );
+
         if (foundAccount) selectAccount(foundAccount.publicKey);
 
         if (immutable) {
@@ -463,14 +492,12 @@ export function GlobalProvider(props: any) {
       if (byteSize < currentAccountInfo.reserved_bytes) {
         const reductionSize = currentAccountInfo.reserved_bytes - byteSize;
         const reductionSizeUnited = byteSizeUnited(reductionSize);
-        console.log('ttt reducing drive size by ', reductionSizeUnited);
         response = await drive
           .reduceStorage(pubkey, reductionSizeUnited, 'v2')
           .catch((err) => reject(err));
       } else {
         const incrementSize = byteSize - currentAccountInfo.reserved_bytes;
         const incrementSizeUnited = byteSizeUnited(incrementSize);
-        console.log('ttt incrementing drive size by ', incrementSizeUnited);
         response = await drive
           .addStorage(pubkey, incrementSizeUnited, 'v2')
           .catch((err) => reject(err));
@@ -543,6 +570,9 @@ export function GlobalProvider(props: any) {
         getCurrentAccountFiles,
         progressBar,
         setProgressBar,
+        noAccounts,
+        localFiles,
+        setLocalFiles,
       }}>
       {props.children}
     </GlobalContext.Provider>

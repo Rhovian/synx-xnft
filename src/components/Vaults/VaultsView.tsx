@@ -51,7 +51,7 @@ export const VaultsView = () => {
                 <Text style={styles.vaultAddress}>{currentAccount}</Text>
               </View>
               {loading ? (
-                <FullScreenLoadingIndicator />
+                <FullScreenLoadingIndicator variantBackground />
               ) : (
                 <FlatList
                   style={styles.listContainer}

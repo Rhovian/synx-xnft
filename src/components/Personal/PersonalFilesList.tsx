@@ -80,8 +80,18 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
   useEffect(() => {
     if (data.length > 0) {
       setLoading(false);
+    } else {
+      setLoading(false);
+      setShowEmptyFiles(true);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (globalProvider.noAccounts) {
+      setLoading(false);
+      setShowEmptyFiles(true);
+    }
+  }, [globalProvider.noAccounts]);
 
   const showVaultView = () => {
     setShowVaultsView(true);

@@ -1,16 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
+import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD } from '../../constants';
 import { FullScreenLoadingIndicator } from '../../utils';
 import { EmptyFiles } from '../EmptyFiles';
 import { RecentFilesList } from '../Recent/RecentFilesList';
 
-export const RecentFiles = () => {
+export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
   const [recentFiles, setRecentFiles] = useState(false);
   const [files, setFiles] = useState<any>([]);
   const [loading, setLoading] = useState(true);
+  const globalContext = useContext(GlobalContext);
 
   const getData = async () => {
     try {
@@ -38,7 +40,7 @@ export const RecentFiles = () => {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [globalContext.localFiles]);
 
   return (
     <View style={styles.container}>
