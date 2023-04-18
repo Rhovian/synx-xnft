@@ -11,7 +11,7 @@ export const VaultsView = () => {
   const globalContext = useContext(GlobalContext);
   const [openCreateVault, setOpenCreateVault] = useState(false);
   const [vaults, setVaults] = useState<any>([globalContext.filteredAccounts]);
-  const [currentAccount, setCurrentAccount] = useState<any>([globalContext.currentAccount]);
+  const [currentAccount, setCurrentAccount] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,66 +38,64 @@ export const VaultsView = () => {
 
   return (
     <View style={styles.createVaultContainer}>
-      {loading ? (
-        <FullScreenLoadingIndicator />
+      {openCreateVault ? (
+        <CreateVault />
       ) : (
-        <>
-          {openCreateVault ? (
-            <CreateVault />
-          ) : (
-            <View style={styles.container}>
-              <View style={styles.appWrapper}>
-                <View style={styles.innerApp}>
-                  <View style={styles.vaultHeader}>
-                    <View style={styles.logo}>
-                      {String(currentAccount) ? currentAccount.substring(0, 2) : ''}
-                    </View>
-                    <Text style={styles.vaultAddress}>{currentAccount}</Text>
-                  </View>
-                  <FlatList
-                    style={styles.listContainer}
-                    data={vaults}
-                    overScrollMode="auto"
-                    keyExtractor={(item: any) => item.publicKey.toString()}
-                    ItemSeparatorComponent={ItemSeparatorComponent}
-                    renderItem={({ item, index }) => {
-                      return index % 2 === 0 ? (
-                        <VaultInfo
-                          vaultInfo={item}
-                          image={
-                            <Image
-                              style={styles.vaultIcon}
-                              source={require('../../assets/vault.png')}
-                            />
-                          }
-                        />
-                      ) : (
-                        <VaultInfo
-                          vaultInfo={item}
-                          image={
-                            <Image
-                              style={styles.vaultIcon}
-                              source={require('../../assets/pink-vault.png')}
-                            />
-                          }
-                        />
-                      );
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setOpenCreateVault(!openCreateVault)}
-                    style={styles.createVault}>
-                    <Image
-                      style={styles.createVaultIcon}
-                      source={require('../../assets/white-vault.png')}
-                    />
-                    Create another Vault
-                  </TouchableOpacity>
+        <View style={styles.container}>
+          <View style={styles.appWrapper}>
+            <View style={styles.innerApp}>
+              <View style={styles.vaultHeader}>
+                <View style={styles.logo}>
+                  {currentAccount ? currentAccount.substring(0, 2) : ''}
                 </View>
+                <Text style={styles.vaultAddress}>{currentAccount}</Text>
               </View>
+              {loading ? (
+                <FullScreenLoadingIndicator />
+              ) : (
+                <FlatList
+                  style={styles.listContainer}
+                  data={vaults}
+                  overScrollMode="auto"
+                  keyExtractor={(item: any) => item.publicKey.toString()}
+                  ItemSeparatorComponent={ItemSeparatorComponent}
+                  renderItem={({ item, index }) => {
+                    return index % 2 === 0 ? (
+                      <VaultInfo
+                        vaultInfo={item}
+                        image={
+                          <Image
+                            style={styles.vaultIcon}
+                            source={require('../../assets/vault.png')}
+                          />
+                        }
+                      />
+                    ) : (
+                      <VaultInfo
+                        vaultInfo={item}
+                        image={
+                          <Image
+                            style={styles.vaultIcon}
+                            source={require('../../assets/pink-vault.png')}
+                          />
+                        }
+                      />
+                    );
+                  }}
+                />
+              )}
+              <TouchableOpacity
+                onPress={() => setOpenCreateVault(!openCreateVault)}
+                style={styles.createVault}>
+                <Image
+                  style={styles.createVaultIcon}
+                  source={require('../../assets/white-vault.png')}
+                />
+                Create another Vault
+              </TouchableOpacity>
             </View>
-          )}
-        </>
+          </View>
+        </View>
       )}
     </View>
   );
