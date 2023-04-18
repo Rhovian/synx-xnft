@@ -47,13 +47,13 @@ export const UploadFile = ({
 
   const handleChange = async (file: any) => {
     onBeginUpload();
-    globalProvider.setProgressBar(0.2);
+    globalProvider.setProgressBar(0.25);
     navigation.setOptions({ headerRight: () => <HeaderRight title="Uploading..." /> });
 
     setFile(file);
 
     await globalProvider.uploadFile(file);
-    globalProvider.setProgressBar(0.5);
+    globalProvider.setProgressBar(0.75);
 
     navigation.setOptions({ headerRight: () => <HeaderRight title="Upload" /> });
     // @ts-ignore
@@ -63,7 +63,7 @@ export const UploadFile = ({
 
     setTimeout(() => {
       globalProvider.setProgressBar(0);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {
