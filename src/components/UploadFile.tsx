@@ -48,8 +48,10 @@ export const UploadFile = ({
 
     setFile(file);
     await globalProvider.uploadFile(file);
-    onEndUpload();
     navigation.setOptions({ headerRight: () => <HeaderRight title="Upload" /> });
+    // @ts-ignore
+    navigation.navigate('Personal');
+    onEndUpload();
   };
 
   useEffect(() => {

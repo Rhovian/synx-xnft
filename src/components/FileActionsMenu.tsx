@@ -35,8 +35,6 @@ export function FileActionsMenu() {
     } else {
       await AsyncStorage.setItem('files', JSON.stringify([file]));
     }
-
-    console.log(await AsyncStorage.getItem('files'));
   };
 
   const removeFromLocalStorage = async () => {

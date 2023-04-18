@@ -63,7 +63,7 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
     // Sort by name if searchValue is empty, otherwise sort by relevance
     let sortedData = filteredData;
     if (searchValue === '') {
-      sortedData = [...filteredData].sort((a, b) => a.name.localeCompare(b.name));
+      sortedData = [...filteredData];
     } else {
       sortedData = sortFileInfoArray(filteredData, searchValue);
     }

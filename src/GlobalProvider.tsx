@@ -135,10 +135,6 @@ export function GlobalProvider(props: any) {
   }, [accountFiles]);
 
   useEffect(() => {
-    console.log('filteredAccount', filteredAccounts);
-  }, [filteredAccounts]);
-
-  useEffect(() => {
     if (currentAccountFiles && drive && currentAccount && accountFiles) {
       const newAccountFiles: Record<string, any[]> = {};
 

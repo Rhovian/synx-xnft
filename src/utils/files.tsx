@@ -51,9 +51,6 @@ const getFileTypeAndIcon = (mimeType: string) => {
 export const getAccountFileInfo = (res: Response, name: string, vault: string) => {
   const mimeType = res.headers.get('Content-Type');
   const size = res.headers.get('Content-Length');
-
-  console.log(name, mimeType);
-
   const fileType = getFileTypeAndIcon(mimeType || '');
 
   const hrsize = humanFileSize(parseInt(size!, 10));

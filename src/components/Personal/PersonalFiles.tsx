@@ -15,7 +15,6 @@ export const PersonalFiles = () => {
 
   useEffect(() => {
     if (globalProvider.currentAccountFiles && globalProvider.currentAccountFiles.length > 0) {
-      console.log('here is a hook for the current account files!');
       setData(globalProvider.currentAccountFiles);
       setLoading(false);
     } else {
