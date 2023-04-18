@@ -32,10 +32,21 @@ export function FileActionsMenu() {
     if (data) {
       const files = JSON.parse(data);
       const newFiles = [...files, file];
-      await AsyncStorage.setItem('files', JSON.stringify(newFiles));
+      try {
+        await AsyncStorage.setItem('files', JSON.stringify(newFiles));
+      } catch {
+        Toast.show({
+          type: 'error',
+          text1: 'Error saving file',
+        });
+      }
     } else {
       await AsyncStorage.setItem('files', JSON.stringify([file]));
     }
+    Toast.show({
+      type: 'success',
+      text1: 'File saved to local storage',
+    });
   };
 
   const removeFromLocalStorage = async () => {
@@ -50,6 +61,10 @@ export function FileActionsMenu() {
   const handleCopy = () => {
     if (file) {
       Clipboard.setString(file.body);
+      Toast.show({
+        type: 'success',
+        text1: 'File Copied to Clipboard',
+      });
     }
   };
 
