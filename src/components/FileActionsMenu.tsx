@@ -95,9 +95,21 @@ export function FileActionsMenu() {
       return;
     }
     if (file) {
-      removeFromLocalStorage();
-      await globalContext.drive?.deleteFile(new PublicKey(file.vault), file.body, 'v2');
-      await globalContext.getCurrentAccountFiles();
+      try {
+        removeFromLocalStorage();
+        await globalContext.drive?.deleteFile(new PublicKey(file.vault), file.body, 'v2');
+        await globalContext.getCurrentAccountFiles();
+      } catch {
+        Toast.show({
+          type: 'error',
+          text1: 'Error deleting file',
+        });
+      }
+      Toast.show({
+        type: 'success',
+        text1: 'File deleted from vault',
+        text2: 'File removed from local storage',
+      });
     }
   };
 
