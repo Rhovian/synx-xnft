@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
 import { FileUploader } from 'react-drag-drop-files';
 import { View, StyleSheet, Image, Text } from 'react-native';
+import * as Progress from 'react-native-progress';
 
 import { GlobalContext } from '../GlobalProvider';
 import { Colors, BOLD, REGULAR } from '../constants';
@@ -40,19 +41,29 @@ export const UploadFile = ({
 }) => {
   const globalProvider = useContext(GlobalContext);
   const [file, setFile] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   const navigation = useNavigation();
 
   const handleChange = async (file: any) => {
     onBeginUpload();
+    globalProvider.setProgressBar(0.2);
     navigation.setOptions({ headerRight: () => <HeaderRight title="Uploading..." /> });
 
     setFile(file);
+
     await globalProvider.uploadFile(file);
+    globalProvider.setProgressBar(0.5);
+
     navigation.setOptions({ headerRight: () => <HeaderRight title="Upload" /> });
     // @ts-ignore
     navigation.navigate('Personal');
     onEndUpload();
+    globalProvider.setProgressBar(1);
+
+    setTimeout(() => {
+      globalProvider.setProgressBar(0);
+    }, 1000);
   };
 
   useEffect(() => {

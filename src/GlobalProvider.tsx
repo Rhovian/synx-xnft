@@ -31,6 +31,7 @@ export interface GlobalProvider {
   currentAccountFiles: any[];
   accountFiles: Record<string, any[]>;
   fileMenuOpen: boolean;
+  progressBar: number;
   currentFile: FileInfo | undefined;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
@@ -50,6 +51,7 @@ export interface GlobalProvider {
   setFileMenu(file: FileInfo): void;
   getAccountInfo(account: PublicKey): Promise<StorageAccountInfo>;
   setFileMenuOpen(open: boolean): void;
+  setProgressBar(progress: number): void;
   changeCurrentAccount(account: PublicKey): Promise<ShadowDriveResponse>;
   getCurrentAccountFiles(): Promise<string[]>;
 }
@@ -72,6 +74,7 @@ export function GlobalProvider(props: any) {
   const [accountFiles, setAccountFiles] = useState<Record<string, any[]>>({});
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<FileInfo>();
+  const [progressBar, setProgressBar] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -538,6 +541,8 @@ export function GlobalProvider(props: any) {
         changeCurrentAccount,
         getAccountInfo,
         getCurrentAccountFiles,
+        progressBar,
+        setProgressBar,
       }}>
       {props.children}
     </GlobalContext.Provider>

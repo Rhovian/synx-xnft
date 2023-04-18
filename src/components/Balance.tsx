@@ -1,12 +1,18 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
+import * as Progress from 'react-native-progress';
 
 import { GlobalContext } from '../GlobalProvider';
 import { Colors, REGULAR } from '../constants';
 
 export function Balance() {
   const globalContext = useContext(GlobalContext);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    setProgress(globalContext.progressBar);
+  }, [globalContext.progressBar]);
 
   return (
     <View style={styles.container}>
@@ -67,6 +73,14 @@ export function Balance() {
           </Text>
         </View>
       </View>
+      <Progress.Bar
+        style={styles.progressBar}
+        color="#A79EE5"
+        progress={progress}
+        height={3}
+        borderRadius={0}
+        width={null}
+      />
     </View>
   );
 }
@@ -74,6 +88,7 @@ export function Balance() {
 const styles = StyleSheet.create({
   container: {
     display: 'flex',
+    position: 'relative',
     justifyContent: 'space-evenly',
     alignItems: 'center',
     flexDirection: 'row',
@@ -85,5 +100,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  progressBar: {
+    position: 'absolute',
+    width: '100%',
+    borderColor: Colors['dark'].inputBackground,
+    bottom: 0,
+    left: 0,
   },
 });
