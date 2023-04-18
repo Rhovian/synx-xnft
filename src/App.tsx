@@ -40,7 +40,7 @@ function TabNavigator() {
     <Tab.Navigator
       initialRouteName="Personal"
       screenOptions={{
-        tabBarActiveTintColor: '#804694',
+        tabBarActiveTintColor: '#A79EE5',
         tabBarActiveBackgroundColor: Colors.dark.inputBackground,
         tabBarInactiveBackgroundColor: Colors.dark.inputBackground,
         tabBarStyle: styles.tabBarStyle,

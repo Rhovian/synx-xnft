@@ -6,8 +6,6 @@ import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD } from '../../constants';
 import { FullScreenLoadingIndicator } from '../../utils';
 
-//Add this line to tell the function that it's in focuse
-
 export const PersonalFiles = () => {
   const globalProvider = useContext(GlobalContext);
   const [loading, setLoading] = useState(true);

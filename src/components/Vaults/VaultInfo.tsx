@@ -20,6 +20,7 @@ export const VaultInfo = ({
   const handlePress = async () => {
     if (activeVault) return;
     await globalContext.changeCurrentAccount(vaultInfo.publicKey);
+    
   };
 
   const getAvailability = () => {

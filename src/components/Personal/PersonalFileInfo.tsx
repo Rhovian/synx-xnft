@@ -42,7 +42,7 @@ export const PesonalFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>
       </div>
       <View style={styles.immutableButton}>
-        <TouchableOpacity onPress={() => handlePress()}>
+        <TouchableOpacity onPress={() => handlePress()} style={{ width: 30, height: '100%' }}>
           <Entypo name="dots-three-vertical" size={20} color="grey" />
         </TouchableOpacity>
       </View>
