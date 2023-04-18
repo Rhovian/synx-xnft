@@ -38,7 +38,9 @@ export const PesonalFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
     <TouchableOpacity style={styles.container} onPress={() => goToFileViewer()}>
       <div style={styles.iconWrapper}>{getFileTypeAndIcon(fileInfo.fileType)}</div>
       <div style={styles.infoContainer}>
-        <Text style={styles.name}>{fileInfo.name.slice(0, 16)}</Text>
+        <Text style={styles.name}>
+          {fileInfo.name.length > 16 ? `${fileInfo.name.slice(0, 16)}...` : fileInfo.name}
+        </Text>
         <Text style={styles.subInfo}>Last modified: 1/1/2021</Text>
       </div>
       <View style={styles.immutableButton}>
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   name: {
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.dark.text,
     fontFamily: BOLD,
     textAlign: 'left',
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'flex-start',
     paddingLeft: 8,
+    width: '50%',
   },
   subInfo: {
     fontSize: 9,
@@ -81,11 +84,14 @@ const styles = StyleSheet.create({
     fontFamily: REGULAR,
   },
   immutableButton: {
-    flexGrow: 1,
+    width: '50%',
     display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
     textAlign: 'end',
     paddingRight: 12,
     zIndex: 10,
+    flexGrow: 1,
   },
   image: {
     width: 30,
