@@ -1,3 +1,4 @@
+import { StorageAccountResponse } from '@shadow-drive/sdk';
 import React, { useContext, useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
@@ -10,10 +11,26 @@ export const PersonalFiles = () => {
   const globalProvider = useContext(GlobalContext);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>([]);
+  const [currentAccount, setCurrentAccount] = useState<StorageAccountResponse | undefined>(
+    globalProvider.currentAccount
+  );
+
+  useEffect(() => {
+    if (globalProvider.currentAccount) {
+      setCurrentAccount(globalProvider.currentAccount);
+    }
+    if (
+      currentAccount &&
+      globalProvider.currentAccount &&
+      currentAccount.publicKey.toString() !== globalProvider.currentAccount.publicKey.toString()
+    ) {
+      setLoading(true);
+    }
+  }, [globalProvider.currentAccount]);
 
   useEffect(() => {
     if (globalProvider.currentAccountFiles && globalProvider.currentAccountFiles.length > 0) {
-      setData(globalProvider.currentAccountFiles);
+      if (data !== globalProvider.currentAccountFiles) setData(globalProvider.currentAccountFiles);
       setLoading(false);
     } else {
       if (data.length > 0) {

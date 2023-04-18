@@ -110,11 +110,13 @@ export function GlobalProvider(props: any) {
   useEffect(() => {
     if (!currentAccount && accounts?.length) {
       selectCurrentAccount().catch((err) => console.log(err.toString()));
+      getAllAccountFiles().catch((err) => console.log(err.toString()));
     }
   }, [accounts]);
 
   useEffect(() => {
     if (currentAccount) {
+      setCurrentAccountFiles(accountFiles[currentAccount.publicKey.toString()]);
       refreshCurrentAccountData().catch((err) => console.log(err.toString()));
     }
   }, [currentAccount]);
@@ -123,7 +125,9 @@ export function GlobalProvider(props: any) {
     if (accountFiles && currentAccount) {
       if (currentAccountFiles.length === 0) {
         setCurrentAccountFiles(accountFiles[currentAccount.publicKey.toString()]);
-      } else {
+      }
+
+      if (accounts && accounts.length > 0 && accountFiles) {
         setFilteredAccounts(
           accounts.sort(
             // @ts-ignore
@@ -134,8 +138,14 @@ export function GlobalProvider(props: any) {
     }
   }, [accountFiles]);
 
-  useEffect(() => {
-    if (currentAccountFiles && drive && currentAccount && accountFiles) {
+  async function refreshCurrentAccountData() {
+    refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
+    /* TODO: should only refresh a the current account */
+    getCurrentAccountFiles().catch((err) => console.log(err.toString()));
+  }
+
+  async function getAllAccountFiles() {
+    if (drive && currentAccount) {
       const newAccountFiles: Record<string, any[]> = {};
 
       Promise.all(
@@ -160,12 +170,6 @@ export function GlobalProvider(props: any) {
         }));
       });
     }
-  }, [currentAccountFiles]);
-
-  async function refreshCurrentAccountData() {
-    refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
-    /* TODO: should only refresh a the current account */
-    getCurrentAccountFiles().catch((err) => console.log(err.toString()));
   }
 
   function setFileMenu(file: FileInfo) {
@@ -266,10 +270,9 @@ export function GlobalProvider(props: any) {
     );
 
     if (!newCurrentAccount) return;
-    const newCurrentAccountFiles = accountFiles[newCurrentAccount.publicKey.toString()];
+    // const newCurrentAccountFiles = accountFiles[newCurrentAccount.publicKey.toString()];
     // @ts-ignore
     setCurrentAccount(newCurrentAccount);
-    setCurrentAccountFiles(newCurrentAccountFiles);
   }
 
   /* 

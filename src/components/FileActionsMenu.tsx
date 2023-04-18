@@ -45,7 +45,7 @@ export function FileActionsMenu() {
     }
     Toast.show({
       type: 'success',
-      text1: 'File saved to local storage',
+      text1: 'File saved!',
     });
   };
 
