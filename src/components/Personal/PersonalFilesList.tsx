@@ -165,11 +165,10 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
                   <TouchableOpacity style={styles.view}>
                     <Feather name="list" size={22} color={Colors.dark.greyText} />
                   </TouchableOpacity>
-                  {/** 
-                    <TouchableOpacity style={styles.view}>
-                      <Entypo name="grid" size={24} color={Colors.dark.greyText} />
+
+                  <TouchableOpacity style={styles.view}>
+                    <Entypo name="grid" size={24} color="transparent" />
                   </TouchableOpacity>
-                  */}
                 </View>
               </View>
               <View style={styles.createVaultIconWrap}>
