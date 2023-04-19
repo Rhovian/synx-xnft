@@ -46,10 +46,8 @@ export function CreateVault({ exitVault }: { exitVault: () => void }) {
       }
       globalContext.setProgressBar(1);
       setLoader(false);
-
-      exitVault();
-
       globalContext.setProgressBar(0);
+      exitVault();
     }
   };
   return (
