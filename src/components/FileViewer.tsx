@@ -1,4 +1,4 @@
-import { Video, Audio } from 'expo-av';
+import { Video, Audio, ResizeMode } from 'expo-av';
 import React, { useState, useEffect } from 'react';
 import { Button, StyleSheet, Text, View, Image } from 'react-native';
 
@@ -99,15 +99,16 @@ const FileViewer = ({ file }: { file: FileInfo }) => {
     case 'video':
       return (
         <View style={styles.container}>
-          <Text>Video file</Text>
           <Video
             source={{ uri: file.body }}
             rate={1.0}
             volume={1.0}
             isMuted={false}
+            resizeMode={ResizeMode.COVER}
             shouldPlay
             useNativeControls
             style={styles.video}
+            videoStyle={styles.videoStyles}
           />
         </View>
       );
@@ -141,8 +142,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   video: {
-    width: '100vw',
+    width: 300,
     height: 300,
+  },
+  videoStyles: {
+    width: '100%',
   },
   image: {
     width: '100vw',

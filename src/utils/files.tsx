@@ -38,7 +38,7 @@ const getFileTypeAndIcon = (mimeType: string) => {
   }
 
   if (fileType === 'mp4') {
-    fileType = 'mp3';
+    fileType = 'mov';
   }
 
   if (fileType === 'quicktime') {
