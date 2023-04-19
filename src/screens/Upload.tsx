@@ -23,6 +23,7 @@ export const Upload = () => {
   useEffect(() => {
     if (globalContext.accounts.length === 0) {
       setNewUser(true);
+      setLoading(false);
     } else {
       setNewUser(false);
     }

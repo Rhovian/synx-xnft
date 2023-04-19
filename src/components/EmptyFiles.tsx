@@ -32,6 +32,16 @@ export const EmptyFiles = ({
     }
   };
 
+  useEffect(() => {
+    if (globalContext.accounts) {
+      if (globalContext.accounts.length === 0) {
+        setShowUpload(false);
+      } else {
+        setShowUpload(true);
+      }
+    }
+  }, [globalContext.accounts]);
+
   return (
     <View style={styles.container}>
       <View style={styles.stateContainer}>

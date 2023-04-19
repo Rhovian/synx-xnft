@@ -17,16 +17,18 @@ export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('files');
-      if (value) {
+      if (value && globalContext.currentAccount) {
         // value previously stored
-        const parsedFiles = JSON.parse(value);
-        if (parsedFiles.length === 0) {
+        const filesObj = JSON.parse(value);
+        const publicKey = globalContext.currentAccount.publicKey.toString();
+        const files = filesObj[publicKey] || [];
+        if (files.length === 0) {
           setLoading(false);
           setRecentFiles(false);
-        } else if (parsedFiles.length > 0) {
+        } else {
           setLoading(false);
           setRecentFiles(true);
-          setFiles(Array.from(parsedFiles));
+          setFiles(Array.from(files));
         }
       } else {
         setLoading(false);
@@ -57,7 +59,7 @@ export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
                 alignItems: 'center',
                 height: 300,
               }}>
-              <FullScreenLoadingIndicator />
+              <FullScreenLoadingIndicator variantBackground />
             </View>
           ) : recentFiles ? (
             <RecentFilesList data={files} />

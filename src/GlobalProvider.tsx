@@ -87,6 +87,12 @@ export function GlobalProvider(props: any) {
 
   useEffect(() => {
     (async () => {
+      await AsyncStorage.removeItem('files');
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       const shdwDrive = await new ShdwDrive(connection, {
         signTransaction: async (tx: Transaction) => {
           return window.xnft.solana.signTransaction(tx);
@@ -104,6 +110,7 @@ export function GlobalProvider(props: any) {
 
       // get local files
       const files = await AsyncStorage.getItem('files');
+      // reset files
       const firstVisit = await AsyncStorage.getItem('visit');
 
       if (files) {

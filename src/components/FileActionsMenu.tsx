@@ -29,35 +29,50 @@ export function FileActionsMenu() {
 
   const addToLocalStorage = async () => {
     const data = await AsyncStorage.getItem('files');
-    if (data) {
-      const files = JSON.parse(data);
-      const newFiles = [...files, file];
-      try {
-        await AsyncStorage.setItem('files', JSON.stringify(newFiles));
-      } catch {
-        Toast.show({
-          type: 'error',
-          text1: 'Error saving file',
-        });
+    const currentAccount = globalContext.currentAccount;
+    if (currentAccount) {
+      const publicKey = currentAccount.publicKey.toString();
+      if (data) {
+        const filesObj = JSON.parse(data);
+        const files = filesObj[publicKey] || [];
+        const newFiles = [...files, file];
+        filesObj[publicKey] = newFiles;
+        try {
+          await AsyncStorage.setItem('files', JSON.stringify(filesObj));
+        } catch {
+          Toast.show({
+            type: 'error',
+            text1: 'Error saving file',
+          });
+        }
+      } else {
+        const filesObj = { [publicKey]: [file] };
+        await AsyncStorage.setItem('files', JSON.stringify(filesObj));
       }
-    } else {
-      await AsyncStorage.setItem('files', JSON.stringify([file]));
+      Toast.show({
+        type: 'success',
+        text1: 'File saved!',
+      });
+      const newData = await AsyncStorage.getItem('files');
+      if (newData) {
+        const filesObj = JSON.parse(newData);
+        globalContext.setLocalFiles(filesObj[publicKey] || []);
+      }
     }
-    Toast.show({
-      type: 'success',
-      text1: 'File saved!',
-    });
-    const newData = await AsyncStorage.getItem('files');
-    if (newData) globalContext.setLocalFiles(JSON.parse(newData));
   };
 
   const removeFromLocalStorage = async () => {
     const data = await AsyncStorage.getItem('files');
-    if (data && file) {
-      const files = JSON.parse(data);
-      const newFiles = files.filter((f: FileInfo) => f.name !== file.name);
-      await AsyncStorage.setItem('files', JSON.stringify(newFiles));
-      globalContext.setLocalFiles(newFiles);
+    if (globalContext.currentAccount) {
+      const publicKey = globalContext.currentAccount.publicKey.toString();
+      if (data && file) {
+        const filesObj = JSON.parse(data);
+        const files = filesObj[publicKey] || [];
+        const newFiles = files.filter((f: FileInfo) => f.name !== file.name);
+        filesObj[publicKey] = newFiles;
+        await AsyncStorage.setItem('files', JSON.stringify(filesObj));
+        globalContext.setLocalFiles(newFiles);
+      }
     }
   };
 
@@ -127,8 +142,10 @@ export function FileActionsMenu() {
 
       setTimeout(() => {
         globalContext.setProgressBar(0);
-        globalContext.setFileMenuOpen(false);
       }, 1000);
+
+      globalContext.setFileMenuOpen(false);
+      navigation.setOptions({ tabBarStyle: { display: 'flex', borderTopWidth: 0 } });
     }
   };
 
