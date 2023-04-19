@@ -117,12 +117,15 @@ export function GlobalProvider(props: any) {
           [wallet.toString()]: false,
         };
         await AsyncStorage.setItem('visit', JSON.stringify(visit));
+        setFirstVisit(true);
       } else {
         const visit: Record<string, boolean> = JSON.parse(firstVisit);
         const walletString = wallet.toString();
+        console.log('visit', visit, walletString);
         if (!visit[walletString]) {
           visit[walletString] = true;
           await AsyncStorage.setItem('visit', JSON.stringify(visit));
+          setFirstVisit(true);
         } else {
           setFirstVisit(false);
         }
@@ -183,10 +186,8 @@ export function GlobalProvider(props: any) {
     if (firstVisit) {
       const visit: Record<string, boolean> = JSON.parse(firstVisit);
       const walletString = wallet.toString();
-      console.log('here1', visit[walletString]);
-      if (visit[walletString]) {
-        console.log('here2');
-        visit[walletString] = false;
+      if (!visit[walletString]) {
+        visit[walletString] = true;
         await AsyncStorage.setItem('visit', JSON.stringify(visit));
       }
     }
