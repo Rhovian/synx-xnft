@@ -15,6 +15,7 @@ export function FileActionsMenu() {
   const globalContext = useContext(GlobalContext);
   const navigation = useNavigation();
   const [file, setFile] = React.useState<FileInfo | null>(null);
+  const [isImmutable, setIsImmutable] = React.useState(false);
 
   const handlePress = () => {
     globalContext.setFileMenuOpen(false);
@@ -26,6 +27,12 @@ export function FileActionsMenu() {
       setFile(globalContext.currentFile);
     }
   }, [globalContext.currentFile]);
+
+  useEffect(() => {
+    if (globalContext.currentAccount) {
+      setIsImmutable(globalContext.currentAccount.account.immutable);
+    }
+  }, [globalContext.currentAccount]);
 
   const addToLocalStorage = async () => {
     const data = await AsyncStorage.getItem('files');
@@ -88,7 +95,7 @@ export function FileActionsMenu() {
   };
 
   const handleBlock = async () => {
-    if (globalContext.currentAccount?.account.immutable) {
+    if (isImmutable) {
       Toast.show({
         type: 'error',
         text1: 'Storage is already immutable',
@@ -96,7 +103,7 @@ export function FileActionsMenu() {
       return;
     }
     if (file && globalContext.currentAccount) {
-      if (!globalContext.currentAccount.account.immutable) {
+      if (!isImmutable) {
         globalContext.setProgressBar(0.4);
         await globalContext.drive?.makeStorageImmutable(new PublicKey(file.vault), 'v2');
         globalContext.setProgressBar(1);
@@ -111,7 +118,7 @@ export function FileActionsMenu() {
   };
 
   const handleDelete = async () => {
-    if (globalContext.currentAccount?.account.immutable) {
+    if (isImmutable) {
       Toast.show({
         type: 'error',
         text1: 'Cannot Delete File',

@@ -11,6 +11,7 @@ import {
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import React, { createContext, useEffect, useState } from 'react';
+import Toast from 'react-native-toast-message';
 
 import { SHADOW_TOKEN_MINT } from './constants';
 import { usePublicKey, useSolanaConnection } from './hooks/xnft-hooks';
@@ -233,10 +234,26 @@ export function GlobalProvider(props: any) {
   }
 
   async function refreshBalances() {
-    setSolBalance((await connection.getBalance(wallet)) / LAMPORTS_PER_SOL);
-    const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
+    let solBalance = 0;
+    let shdwBalance = 0;
+    try {
+      solBalance = (await connection.getBalance(wallet)) / LAMPORTS_PER_SOL;
+      const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
+      shdwBalance = (await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!;
+    } catch (e) {
+      console.log(e);
+    }
+    setSolBalance(solBalance);
     setShdwTokenAccount(shdwTokenAccount);
-    setShdwBalance((await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!);
+    setShdwBalance(shdwBalance);
+
+    if (solBalance === 0 || shdwBalance === 0) {
+      Toast.show({
+        type: 'error',
+        text1: `(${solBalance}) SOL | (${shdwBalance}) SHDW in wallet`,
+        text2: 'Please fund your wallet to use Synx',
+      });
+    }
   }
 
   const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {

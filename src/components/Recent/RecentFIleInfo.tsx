@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useContext, useEffect } from 'react';
 import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
+import { GlobalContext } from '../../GlobalProvider';
 import { Colors, BOLD, MEDIUM, REGULAR } from '../../constants';
 import { FileInfo } from '../../models';
 
 // @ts-ignore
 export const RecentFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
   const [fileIcon, setFileIcon] = React.useState<any>(null);
+  const globalContext = useContext(GlobalContext);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (fileInfo) {
@@ -14,8 +18,15 @@ export const RecentFileInfo = ({ fileInfo }: { fileInfo: FileInfo }) => {
     }
   }, [fileInfo]);
 
+  const goToFileViewer = () => {
+    globalContext.setFileMenu(fileInfo);
+    console.log('fileInfo', fileInfo);
+    // @ts-ignore
+    navigation.navigate('FileViewer');
+  };
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={() => goToFileViewer()}>
       <Image source={fileIcon} resizeMode="contain" style={styles.iconWrapper} />
       <div style={styles.infoContainer}>
         <Text style={styles.name}>{fileInfo.name.slice(0, 16)}...</Text>
