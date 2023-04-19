@@ -52,7 +52,7 @@ export function Balance() {
               textAlign: 'center',
               fontFamily: REGULAR,
             }}>
-            {globalContext.shdwBalance.toFixed(2)} SOL
+            {globalContext.shdwBalance.toFixed(2)} SHDW
           </Text>
         </View>
       </View>

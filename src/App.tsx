@@ -86,7 +86,7 @@ function TabNavigator() {
           tabBarButton: () => null,
           headerStyle: styles.headerStyle,
           headerLeft: () => <HeaderLeft />,
-          headerRight: () => <HeaderRight title="Upload" />,
+          headerRight: () => <HeaderRight title="Viewer" />,
           headerTitle: 'File Viewer',
         }}
       />

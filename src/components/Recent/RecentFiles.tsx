@@ -15,13 +15,17 @@ export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
   const globalContext = useContext(GlobalContext);
 
   const getData = async () => {
+    console.log('here at getData');
     try {
       const value = await AsyncStorage.getItem('files');
+      console.log('local files value', value);
+      console.log('current account', globalContext.currentAccount);
       if (value && globalContext.currentAccount) {
         // value previously stored
         const filesObj = JSON.parse(value);
         const publicKey = globalContext.currentAccount.publicKey.toString();
         const files = filesObj[publicKey] || [];
+        console.log('files', files);
         if (files.length === 0) {
           setLoading(false);
           setRecentFiles(false);
@@ -29,6 +33,7 @@ export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
           setLoading(false);
           setRecentFiles(true);
           setFiles(Array.from(files));
+          console.log('success condition reached...');
         }
       } else {
         setLoading(false);

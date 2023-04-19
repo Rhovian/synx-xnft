@@ -55,6 +55,7 @@ export function FileActionsMenu() {
       });
       const newData = await AsyncStorage.getItem('files');
       if (newData) {
+        console.log('new data on pin', newData);
         const filesObj = JSON.parse(newData);
         globalContext.setLocalFiles(filesObj[publicKey] || []);
       }
