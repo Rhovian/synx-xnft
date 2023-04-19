@@ -141,12 +141,12 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   video: {
-    width: 300,
+    width: '100vw',
     height: 300,
   },
   image: {
-    width: 300,
-    height: 300,
+    width: '100vw',
+    height: '100vh',
   },
 });
 

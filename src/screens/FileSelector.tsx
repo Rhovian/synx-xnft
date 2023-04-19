@@ -46,10 +46,11 @@ const styles = StyleSheet.create({
   exitVault: {
     position: 'absolute',
     right: 15,
-    top: 40,
+    top: 20,
     fontSize: 18,
     color: Colors.dark.text,
     fontFamily: BOLD,
+    zIndex: 1000,
   },
   close: {
     width: 15,
