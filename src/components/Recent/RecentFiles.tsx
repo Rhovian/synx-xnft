@@ -7,12 +7,14 @@ import { Colors, BOLD } from '../../constants';
 import { FullScreenLoadingIndicator } from '../../utils';
 import { EmptyFiles } from '../EmptyFiles';
 import { RecentFilesList } from '../Recent/RecentFilesList';
+import { CreateVault } from '../Vaults/CreateVault';
 
 export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
   const [recentFiles, setRecentFiles] = useState(false);
   const [files, setFiles] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const globalContext = useContext(GlobalContext);
+  const [showCreateVault, setShowCreateVault] = useState(false);
 
   const getData = async () => {
     console.log('here at getData');
@@ -51,28 +53,34 @@ export const RecentFiles = ({ localFiles }: { localFiles: any }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.appTitle}>Recent Files</View>
-      <View style={styles.appWrapper}>
-        <View style={styles.innerApp}>
-          {loading ? (
-            <View
-              style={{
-                display: 'flex',
-                flexGrow: 1,
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 300,
-              }}>
-              <FullScreenLoadingIndicator variantBackground />
+      {showCreateVault ? (
+        <CreateVault exitVault={() => setShowCreateVault(false)} />
+      ) : (
+        <View style={styles.container}>
+          <View style={styles.appTitle}>Recent Files</View>
+          <View style={styles.appWrapper}>
+            <View style={styles.innerApp}>
+              {loading ? (
+                <View
+                  style={{
+                    display: 'flex',
+                    flexGrow: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 300,
+                  }}>
+                  <FullScreenLoadingIndicator variantBackground />
+                </View>
+              ) : recentFiles ? (
+                <RecentFilesList data={files} />
+              ) : (
+                <EmptyFiles showCreateVault={() => setShowCreateVault(true)} />
+              )}
             </View>
-          ) : recentFiles ? (
-            <RecentFilesList data={files} />
-          ) : (
-            <EmptyFiles />
-          )}
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };
