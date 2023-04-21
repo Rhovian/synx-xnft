@@ -4,7 +4,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FlatList } from 'react-native-gesture-handler';
+import { FlatGrid } from 'react-native-super-grid';
 
+import { GridPersonalFileInfo } from './GridPersonalFileInfo';
 import { PesonalFileInfo } from './PersonalFileInfo';
 import { GlobalContext } from '../../GlobalProvider';
 import { BOLD, Colors, MEDIUM, REGULAR } from '../../constants';
@@ -38,6 +40,7 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
   const [displayClose, setDisplayClose] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showEmptyFiles, setShowEmptyFiles] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
 
   useEffect(() => {
     if (globalProvider.currentAccountFiles) {
@@ -162,12 +165,12 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
                   )}
                 />
                 <View style={styles.viewContainer}>
-                  <TouchableOpacity style={styles.view}>
+                  <TouchableOpacity style={styles.view} onPress={() => setShowGrid(false)}>
                     <Feather name="list" size={22} color={Colors.dark.greyText} />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.view}>
-                    <Entypo name="grid" size={24} color="transparent" />
+                  <TouchableOpacity style={styles.view} onPress={() => setShowGrid(true)}>
+                    <Entypo name="grid" size={22} color={Colors.dark.greyText} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -189,6 +192,14 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
             ) : (
               <EmptyFiles showCreateVault={() => setShowCreateVault(true)} />
             )
+          ) : showGrid ? (
+            <FlatGrid
+              style={styles.listContainer}
+              data={sortedData}
+              itemDimension={100}
+              spacing={10}
+              renderItem={({ item }) => <GridPersonalFileInfo fileInfo={item} />}
+            />
           ) : (
             <FlatList
               style={styles.listContainer}
@@ -239,12 +250,18 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   listContainer: {
-    width: '97%',
+    width: '100%',
     minWidth: 300,
     maxHeight: 320,
     height: '100%',
     zIndex: 99,
     marginVertical: 8,
+  },
+  gridContainer: {
+    flex: 1,
+    margin: 4,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
   inputStyles: {
     width: '100%',
