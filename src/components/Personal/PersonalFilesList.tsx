@@ -166,11 +166,19 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
                 />
                 <View style={styles.viewContainer}>
                   <TouchableOpacity style={styles.view} onPress={() => setShowGrid(false)}>
-                    <Feather name="list" size={22} color={Colors.dark.greyText} />
+                    <Feather
+                      name="list"
+                      size={22}
+                      color={showGrid ? Colors.dark.greyText : '#A79EE5'}
+                    />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.view} onPress={() => setShowGrid(true)}>
-                    <Entypo name="grid" size={22} color={Colors.dark.greyText} />
+                    <Entypo
+                      name="grid"
+                      size={22}
+                      color={showGrid ? '#A79EE5' : Colors.dark.greyText}
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
