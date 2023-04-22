@@ -122,7 +122,6 @@ export function GlobalProvider(props: any) {
       } else {
         const visit: Record<string, boolean> = JSON.parse(firstVisit);
         const walletString = wallet.toString();
-        console.log('visit', visit, walletString);
         if (!visit[walletString]) {
           visit[walletString] = true;
           await AsyncStorage.setItem('visit', JSON.stringify(visit));
