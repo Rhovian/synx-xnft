@@ -109,7 +109,6 @@ export function GlobalProvider(props: any) {
       const firstVisit = await AsyncStorage.getItem('visit');
 
       if (files) {
-        console.log('setting local files', files);
         setLocalFiles(JSON.parse(files));
       }
 
