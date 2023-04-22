@@ -1,7 +1,7 @@
 {
   "name": "Synx | Blockchain Storage",
   "version": "1.0.1",
-  "storage": "arweave",
+  "storage": "s3",
   "description": "With the Synx xNFT, you can store your files, photos, videos, and other important documents securely on the blockchain via GenesysGo's Shadow Drive, ensuring that they are always safe and easily accessible from anywhere in the world.",
   "website": "https://t.co/OEm0YB4p3K",
   "kind": "app",
