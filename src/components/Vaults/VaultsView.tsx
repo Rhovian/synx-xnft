@@ -7,7 +7,7 @@ import { Colors, BOLD, REGULAR } from '../../constants';
 import { shortenString, FullScreenLoadingIndicator } from '../../utils';
 import { CreateVault } from '../Vaults/CreateVault';
 
-export const VaultsView = () => {
+export const VaultsView = ({ exitVaultsView }: { exitVaultsView: any }) => {
   const globalContext = useContext(GlobalContext);
   const [openCreateVault, setOpenCreateVault] = useState(false);
   const [vaults, setVaults] = useState<any>([globalContext.filteredAccounts]);
@@ -39,9 +39,16 @@ export const VaultsView = () => {
   return (
     <View style={styles.createVaultContainer}>
       {openCreateVault ? (
-        <CreateVault />
+        <CreateVault exitVault={() => setOpenCreateVault(false)} />
       ) : (
         <View style={styles.container}>
+          <TouchableOpacity style={styles.exitVault} onPress={() => exitVaultsView()}>
+            <Image
+              style={styles.close}
+              resizeMode="contain"
+              source={require('../../assets/close.png')}
+            />
+          </TouchableOpacity>
           <View style={styles.appWrapper}>
             <View style={styles.innerApp}>
               <View style={styles.vaultHeader}>
@@ -208,11 +215,12 @@ const styles = StyleSheet.create({
   },
   exitVault: {
     position: 'absolute',
-    right: 8,
-    top: 4,
+    right: 20,
+    top: 14,
     fontSize: 18,
     color: Colors.dark.text,
     fontFamily: BOLD,
+    zIndex: 999,
   },
   createVault: {
     display: 'flex',
@@ -241,5 +249,11 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     marginRight: 4,
+  },
+  close: {
+    width: 15,
+    height: 15,
+    marginTop: 15,
+    marginRight: 2,
   },
 });

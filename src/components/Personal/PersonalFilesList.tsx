@@ -96,12 +96,9 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
     }
   }, [globalProvider.noAccounts]);
 
-  const showVaultView = () => {
-    setShowVaultsView(true);
-  };
-
-  const closeVaultView = () => {
-    setShowVaultsView(false);
+  const handleShowCreateVault = () => {
+    console.log('here');
+    setShowCreateVault(false);
   };
 
   useIsFocused();
@@ -110,22 +107,7 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
     <View style={styles.container}>
       {showVaultsView ? (
         <div style={styles.vaultsViewWrap}>
-          <VaultsView />
-          {displayClose ? (
-            showCreateVault ? (
-              <div />
-            ) : (
-              <TouchableOpacity style={styles.exitVault} onPress={closeVaultView}>
-                <Image
-                  style={styles.close}
-                  resizeMode="contain"
-                  source={require('../../assets/close.png')}
-                />
-              </TouchableOpacity>
-            )
-          ) : (
-            <div />
-          )}
+          <VaultsView exitVaultsView={() => setShowVaultsView(false)} />
         </div>
       ) : (
         <div style={styles.appContainer}>
@@ -183,7 +165,7 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
                 </View>
               </View>
               <View style={styles.createVaultIconWrap}>
-                <TouchableOpacity style={styles.view} onPress={showVaultView}>
+                <TouchableOpacity style={styles.view} onPress={() => setShowVaultsView(true)}>
                   <Image
                     style={styles.creatVaultIcon}
                     source={require('../../assets/create-vault-icon.png')}
@@ -196,7 +178,7 @@ export const PersonalFilesList = ({ data }: { data: FileInfo[] }) => {
             <FullScreenLoadingIndicator />
           ) : showEmptyFiles ? (
             showCreateVault ? (
-              <CreateVault exitVault={() => setShowCreateVault(false)} />
+              <CreateVault exitVault={handleShowCreateVault} />
             ) : (
               <EmptyFiles showCreateVault={() => setShowCreateVault(true)} />
             )

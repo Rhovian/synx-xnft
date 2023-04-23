@@ -18,7 +18,7 @@ import { BOLD, REGULAR, Colors, MEDIUM } from '../../constants';
 const windowHeight = Dimensions.get('window').height;
 
 // @ts-ignore
-export function CreateVault({ exitVault }: { exitVault: () => void }) {
+export function CreateVault({ exitVault }: { exitVault: any }) {
   const [vaultName, setVaultName] = useState('');
   const [vaultSize, setVaultSize] = useState('');
   const [loader, setLoader] = useState(false);
@@ -57,7 +57,7 @@ export function CreateVault({ exitVault }: { exitVault: () => void }) {
         setDropdown(false);
       }}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.exitVault} onPress={() => exitVault()}>
+        <TouchableOpacity style={styles.exitVault} onPress={exitVault}>
           <Image
             style={styles.close}
             resizeMode="contain"
