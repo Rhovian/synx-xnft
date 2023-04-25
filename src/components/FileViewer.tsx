@@ -1,54 +1,157 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Video, ResizeMode } from 'expo-av';
-import React from 'react';
-import { View, Image, Text } from 'react-native';
+import { Video, Audio, ResizeMode } from 'expo-av';
+import React, { useState, useEffect } from 'react';
+import { Button, StyleSheet, Text, View, Image } from 'react-native';
 
-import { AudioFile } from './dashboard/AudioFile';
 import { Colors } from '../constants';
-import { RootStackParamList } from '../models';
+import { FileInfo } from '../models';
 
-export function FileViewer({ route }: NativeStackScreenProps<RootStackParamList, 'FileViewer'>) {
-  const { fileType, body } = route.params;
+const FileViewer = ({ file }: { file: FileInfo }) => {
+  const [fileType, setFileType] = useState('unknown');
+  const [sound, setSound] = React.useState();
 
-  if (fileType === 'image') {
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync({ uri: file.body });
+    // @ts-ignore
+    setSound(sound);
+
+    await sound.playAsync();
+  }
+
+  useEffect(() => {
+    if (file)
+      switch (file.fileType) {
+        case 'pdf':
+          setFileType('pdf');
+          break;
+        case 'html':
+          setFileType('html');
+          break;
+        case 'ppt':
+        case 'pptx':
+          setFileType('ppt');
+          break;
+        case 'txt':
+          setFileType('text');
+          break;
+        case 'js':
+          setFileType('javascript');
+          break;
+        case 'mp3':
+        case 'm4a':
+          setFileType('audio');
+          break;
+        case 'mov':
+        case 'mp4':
+        case 'avi':
+          setFileType('video');
+          break;
+        case 'png':
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+          setFileType('image');
+          break;
+        default:
+          setFileType('unknown');
+      }
+  }, [file]);
+
+  if (!fileType || fileType === 'unknown') {
     return (
-      <View style={{ flex: 1 }}>
-        <Image
-          style={{ flex: 1, backgroundColor: Colors.dark.background }}
-          source={{ uri: body }}
-          resizeMode="contain"
-        />
-      </View>
-    );
-  } else if (fileType === 'video') {
-    return (
-      <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-          <Video
-            source={{ uri: body }}
-            style={{ width: window.innerWidth, height: '100%' }}
-            resizeMode={ResizeMode.CONTAIN}
-            isMuted={false}
-            shouldPlay
-            isLooping
-            onReadyForDisplay={(videoData) => {
-              // @ts-ignore
-              videoData.path[0].style.position = 'relative';
-            }}
-          />
-        </View>
-      </View>
-    );
-  } else if (fileType === 'audio') {
-    return <AudioFile uri={body} />;
-  } else if (fileType === 'text') {
-    return <Text>{body}</Text>;
-  } else {
-    return (
-      <View style={{ flex: 1, padding: 10 }}>
-        <Text>File type not supported</Text>
-        <Text>{body}</Text>
+      <View style={styles.container}>
+        <Text>This file type is not supported</Text>
       </View>
     );
   }
-}
+
+  switch (fileType) {
+    case 'pdf':
+      return (
+        <View style={styles.container}>
+          <Text>This file type is not supported</Text>
+        </View>
+      );
+    case 'ppt':
+      return (
+        <View style={styles.container}>
+          <Text>This file type is not supported</Text>
+        </View>
+      );
+    case 'text':
+      return (
+        <View style={styles.container}>
+          <Text>{file.body}</Text>
+        </View>
+      );
+    case 'javascript':
+      return (
+        <View style={styles.container}>
+          <Text>{file.body}</Text>
+        </View>
+      );
+    case 'audio':
+      return (
+        <View style={styles.container}>
+          <Text>Audio file</Text>
+          <Button title="Play Sound" onPress={playSound} />
+        </View>
+      );
+    case 'video':
+      return (
+        <View style={styles.container}>
+          <Video
+            source={{ uri: file.body }}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay
+            useNativeControls
+            style={styles.video}
+            videoStyle={styles.videoStyles}
+          />
+        </View>
+      );
+    case 'image':
+      return (
+        <View style={styles.container}>
+          <Image source={{ uri: file.body }} resizeMode="contain" style={styles.image} />
+        </View>
+      );
+    case 'html':
+      return (
+        <View style={styles.container}>
+          <Text>This file type is not supported</Text>
+        </View>
+      );
+    default:
+      return (
+        <View style={styles.container}>
+          <Text>This file type is not supported</Text>
+        </View>
+      );
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.dark.inputBackground,
+    zIndex: 1,
+  },
+  video: {
+    width: 300,
+    height: 300,
+  },
+  videoStyles: {
+    width: '100%',
+  },
+  image: {
+    width: '100vw',
+    height: '100vh',
+  },
+});
+
+export default FileViewer;

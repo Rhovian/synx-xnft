@@ -1,16 +1,27 @@
 {
-  "name": "Synx Test",
-  "version": "0.0.1",
-  "description": "Synx pilot app",
-  "website": "http://wao.gg",
+  "name": "Synx | Blockchain Storage",
+  "version": "1.0.2",
+  "storage": "aws",
+  "description": "With the Synx xNFT, you can store your files, photos, videos, and other important documents securely on the blockchain via GenesysGo's Shadow Drive, ensuring that they are always safe and easily accessible from anywhere in the world.",
+  "website": "https://t.co/OEm0YB4p3K",
   "kind": "app",
   "icon": {
-    "md": "./assets/vault.png"
+    "md": "./assets/logo.png"
   },
-  "contact": {
-    "repository": "https://github.com/Mjavala/synx-xnft"
-  },
-  "screenshots": ["./assets/vault.png"],
+  "contact": "https://github.com/Mjavala/synx-xnft",
+  "programIds": [
+    "SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y",
+    "972oJTFyjmVNsWM4GHEGPWUomAiJf2qrVotLtwnKmWem",
+    "SHDWRWMZ6kmRG9CvKFSD7kVcnUqXMtd3SaMrLvWscbj",
+    "2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ"
+  ],
+  "screenshots": [
+    "./assets/test-vault.png",
+    "./assets/xnft-hero.png",
+    "./assets/xnft-video.png",
+    "./assets/upload.png",
+    "./assets/vaults-view.png"
+  ],
   "entrypoints": {
     "default": {
       "web": "./web-build/index.html"

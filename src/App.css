@@ -3,7 +3,7 @@
 }
 
 #createVaultInput::placeholder {
-  color: #fff;
+  color: '#fff';
   opacity: 1; /* Firefox */
   line-height: 35px;
 }
@@ -14,4 +14,10 @@
 
 input:focus::-webkit-input-placeholder {
   opacity: 0;
+}
+
+/* drag and drop */
+.dragAndDrop {
+  display: 'flex';
+  border: 'none' !important;
 }

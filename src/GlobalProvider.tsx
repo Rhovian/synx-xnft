@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ShdwDrive,
   StorageAccountResponse,
@@ -10,9 +11,11 @@ import {
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, Transaction } from '@solana/web3.js';
 import React, { createContext, useEffect, useState } from 'react';
+import Toast from 'react-native-toast-message';
 
 import { SHADOW_TOKEN_MINT } from './constants';
 import { usePublicKey, useSolanaConnection } from './hooks/xnft-hooks';
+import { FileInfo } from './models';
 import { byteSizeUnited, getAccountFileInfo } from './utils';
 
 export interface GlobalProvider {
@@ -24,23 +27,40 @@ export interface GlobalProvider {
   shdwTokenAccount: PublicKey | undefined;
   drive: ShdwDrive | undefined;
   accounts: StorageAccountResponse[];
+  filteredAccounts: StorageAccountResponse[];
   currentAccount: StorageAccountResponse | undefined;
   currentAccountInfo: any;
   currentAccountFiles: any[];
   accountFiles: Record<string, any[]>;
+  fileMenuOpen: boolean;
+  progressBar: number;
+  noAccounts: boolean;
+  firstVisit: boolean;
+  currentFile: FileInfo | undefined;
+  localFiles: FileInfo[] | undefined;
+  setLocalFiles(files: FileInfo[]): void;
   refreshBalances(): Promise<void>;
   refreshAccounts(): Promise<StorageAccountResponse[]>;
   selectAccount(account: PublicKey): Promise<void>;
   refreshCurrentAccountInfo(): Promise<StorageAccountInfo>;
   refreshCurrentAccountData(): Promise<void>;
-  refreshCurrentAccountFiles(): Promise<string[]>;
-  createAccount(accountName: string, size: string): Promise<CreateStorageResponse>;
+  setVisited(): void;
+  createAccount(
+    accountName: string,
+    size: string,
+    immutable: boolean
+  ): Promise<CreateStorageResponse>;
   uploadFile(file: any): Promise<void>;
   deleteCurrentAccount(): Promise<ShadowDriveResponse>;
   undeleteCurrentAccount(): Promise<ShadowDriveResponse>;
   resizeCurrentAccount(size: number, unit: string): Promise<ShadowDriveResponse>;
   deleteCurrentAccountFile(fileUrl: string): Promise<ShadowDriveResponse>;
-  refreshFiles(): Promise<void>;
+  setFileMenu(file: FileInfo): void;
+  getAccountInfo(account: PublicKey): Promise<StorageAccountInfo>;
+  setFileMenuOpen(open: boolean): void;
+  setProgressBar(progress: number): void;
+  changeCurrentAccount(account: PublicKey): Promise<ShadowDriveResponse>;
+  getCurrentAccountFiles(): Promise<string[]>;
 }
 // @ts-ignore
 export const GlobalContext = createContext<GlobalProvider>({});
@@ -53,11 +73,18 @@ export function GlobalProvider(props: any) {
   const [shdwTokenAccount, setShdwTokenAccount] = useState<PublicKey>();
   const [drive, setDrive] = useState<ShdwDrive>();
   const [accounts, setAccounts] = useState<StorageAccountResponse[]>([]);
+  const [filteredAccounts, setFilteredAccounts] = useState<StorageAccountResponse[]>([]);
   const [currentAccount, setCurrentAccount] = useState<StorageAccountResponse>();
   const [currentAccountInfo, setCurrentAccountInfo] = useState<StorageAccountInfo>();
-  const [currentAccountFiles, setCurrentAccountFiles] = useState<string[]>([]);
+  const [currentAccountFiles, setCurrentAccountFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [accountFiles, setAccountFiles] = useState<Record<string, any[]>>({});
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
+  const [currentFile, setCurrentFile] = useState<FileInfo>();
+  const [progressBar, setProgressBar] = useState(0);
+  const [noAccounts, setNoAccounts] = useState(false);
+  const [localFiles, setLocalFiles] = useState<FileInfo[] | null>([]);
+  const [firstVisit, setFirstVisit] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -68,13 +95,40 @@ export function GlobalProvider(props: any) {
         signAllTransactions: async (txs: Transaction[]) => {
           return window.xnft.solana.signAllTransactions(txs);
         },
-        signMessage(msg: any) {
+        signMessage: async (msg: any) => {
           return window.xnft.solana.signMessage(msg);
         },
         publicKey: new PublicKey(wallet),
       }).init();
 
       setDrive(shdwDrive);
+
+      // get local files
+      const files = await AsyncStorage.getItem('files');
+      // reset files
+      const firstVisit = await AsyncStorage.getItem('visit');
+
+      if (files) {
+        setLocalFiles(JSON.parse(files));
+      }
+
+      if (!firstVisit) {
+        const visit: Record<string, boolean> = {
+          [wallet.toString()]: false,
+        };
+        await AsyncStorage.setItem('visit', JSON.stringify(visit));
+        setFirstVisit(true);
+      } else {
+        const visit: Record<string, boolean> = JSON.parse(firstVisit);
+        const walletString = wallet.toString();
+        if (!visit[walletString]) {
+          visit[walletString] = true;
+          await AsyncStorage.setItem('visit', JSON.stringify(visit));
+          setFirstVisit(true);
+        } else {
+          setFirstVisit(false);
+        }
+      }
     })();
   }, [wallet]);
 
@@ -94,113 +148,213 @@ export function GlobalProvider(props: any) {
   }, [drive]);
 
   useEffect(() => {
-    if (!currentAccount && accounts?.length) selectAccount(accounts[0].publicKey);
+    if (!currentAccount && accounts?.length) {
+      selectCurrentAccount().catch((err) => console.log(err.toString()));
+      if (accounts.length > 1) {
+        getAllAccountFiles().catch((err) => console.log(err.toString()));
+      }
+    }
   }, [accounts]);
 
   useEffect(() => {
-    refreshCurrentAccountData();
+    if (currentAccount) {
+      setCurrentAccountFiles(accountFiles[currentAccount.publicKey.toString()]);
+      refreshCurrentAccountData().catch((err) => console.log(err.toString()));
+    }
   }, [currentAccount]);
+
+  useEffect(() => {
+    if (accountFiles && currentAccount) {
+      if (currentAccountFiles.length === 0) {
+        setCurrentAccountFiles(accountFiles[currentAccount.publicKey.toString()]);
+      }
+
+      if (accounts && accounts.length > 0 && accountFiles) {
+        setFilteredAccounts(
+          accounts.sort(
+            // @ts-ignore
+            (a, b) => accountFiles[a.publicKey.toString()] - accountFiles[b.publicKey.toString()]
+          )
+        );
+      }
+    }
+  }, [accountFiles]);
+
+  async function setVisited() {
+    const firstVisit = await AsyncStorage.getItem('visit');
+    if (firstVisit) {
+      const visit: Record<string, boolean> = JSON.parse(firstVisit);
+      const walletString = wallet.toString();
+      if (!visit[walletString]) {
+        visit[walletString] = true;
+        await AsyncStorage.setItem('visit', JSON.stringify(visit));
+      }
+    }
+  }
 
   async function refreshCurrentAccountData() {
     refreshCurrentAccountInfo().catch((err) => console.log(err.toString()));
+    /* TODO: should only refresh a the current account */
+    getCurrentAccountFiles().catch((err) => console.log(err.toString()));
+  }
+
+  async function getAllAccountFiles() {
+    if (drive && currentAccount) {
+      const newAccountFiles: Record<string, any[]> = {};
+
+      Promise.all(
+        accounts
+          .filter(
+            (account) => account.publicKey.toString() !== currentAccount?.publicKey.toString()
+          )
+          .map(async (account) => {
+            const files = await drive.listObjects(new PublicKey(account.publicKey));
+            return getAccountFiles(account, files);
+          })
+      ).then((res) => {
+        res.forEach((files, index) => {
+          const account = accounts[index];
+          newAccountFiles[account.publicKey.toString()] = files;
+        });
+
+        setAccountFiles((prevState) => ({
+          ...prevState,
+          ...newAccountFiles,
+          [currentAccount.publicKey.toString()]: currentAccountFiles,
+        }));
+      });
+    }
+  }
+
+  function setFileMenu(file: FileInfo) {
+    setFileMenuOpen(true);
+    setCurrentFile(file);
   }
 
   async function refreshBalances() {
-    setSolBalance((await connection.getBalance(wallet)) / LAMPORTS_PER_SOL);
-    const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
+    let solBalance = 0;
+    let shdwBalance = 0;
+    try {
+      solBalance = (await connection.getBalance(wallet)) / LAMPORTS_PER_SOL;
+      const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
+      shdwBalance = (await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!;
+    } catch (e) {
+      console.log(e);
+    }
+    setSolBalance(solBalance);
     setShdwTokenAccount(shdwTokenAccount);
-    setShdwBalance((await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!);
+    setShdwBalance(shdwBalance);
+
+    if (solBalance === 0 || shdwBalance === 0) {
+      Toast.show({
+        type: 'error',
+        text1: `(${solBalance}) SOL | (${shdwBalance}) SHDW in wallet`,
+        text2: 'Please fund your wallet to use Synx',
+      });
+    }
   }
 
   const getAccountFiles = async (account: StorageAccountResponse, files: ListObjectsResponse) => {
     const accountKey = account.publicKey.toString();
-    const accountFilesArray = await Promise.all(
+    return await Promise.all(
       files.keys.map(async (file) => {
         const res = await fetch(
           `https://shdw-drive.genesysgo.net/` + account.publicKey + '/' + file
         );
 
-        return getAccountFileInfo(res, file);
+        return getAccountFileInfo(res, file, accountKey);
       })
     );
-    setAccountFiles((prevAccountFiles) => ({
-      ...prevAccountFiles,
-      [accountKey]: accountFilesArray,
-    }));
   };
 
+  async function selectCurrentAccount() {
+    if (!accounts?.length) return;
+    if (!drive) return;
+
+    let account: StorageAccountResponse | undefined;
+
+    for await (const [i, acct] of accounts.entries()) {
+      // get files
+      const files = await drive.listObjects(new PublicKey(acct.publicKey));
+      if (files.keys.length > 0) {
+        const accountFiles = await getAccountFiles(acct, files);
+        setAccountFiles((prevState) => ({
+          ...prevState,
+          [acct.publicKey.toString()]: accountFiles,
+        }));
+        account = acct;
+        break; // exit the loop if files have been found
+      } else {
+        if (i === accounts.length - 1)
+          // there is no account with files, set it manually
+          account = accounts[0];
+      }
+    }
+
+    setCurrentAccount(account);
+    return account;
+  }
+
+  async function getCurrentAccountFiles() {
+    if (!drive) return;
+    if (!currentAccount) return;
+
+    const files = await drive.listObjects(new PublicKey(currentAccount.publicKey));
+    const accountFiles = await getAccountFiles(currentAccount, files);
+
+    setAccountFiles((prevState) => ({
+      ...prevState,
+      [currentAccount.publicKey.toString()]: accountFiles,
+    }));
+
+    setCurrentAccountFiles(accountFiles); // update currentAccountFiles state
+  }
+
   async function refreshAccounts() {
-    return new Promise<StorageAccountResponse[]>(async (resolve, reject) => {
-      setLoading(true);
-      if (!drive) {
-        reject(new Error('drive not initialized'));
-        return;
-      }
+    if (!drive) return;
 
-      try {
-        const accts = await drive.getStorageAccounts('v2').catch((err) => reject(err));
+    const accts: StorageAccountResponse[] = await drive.getStorageAccounts('v2');
 
-        if (accts) {
-          const filteredAccounts: StorageAccountResponse[] = [];
-          // check if the account has files
-          for await (const acct of accts) {
-            // get fliles
-            const files = await drive.listObjects(new PublicKey(acct.publicKey));
-            if (files.keys.length > 0) {
-              filteredAccounts.push(acct);
-              getAccountFiles(acct, files);
-            }
-          }
-          setAccounts(
-            accts.sort((a, b) =>
-              a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
-            )
-          );
-          resolve(accts);
-        }
-        setLoading(false);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    if (accts.length > 0) {
+      setAccounts(
+        accts.sort((a, b) =>
+          a?.account?.identifier?.toLowerCase() > b?.account?.identifier?.toLowerCase() ? 1 : -1
+        )
+      );
+    } else {
+      // new to shadow drive
+      setNoAccounts(true);
+    }
+
+    return accts;
   }
 
   async function selectAccount(account: PublicKey) {
     setCurrentAccount(accounts[accounts.map((a) => a.publicKey).indexOf(account)]);
   }
 
-  async function refreshCurrentAccountFiles() {
-    return new Promise<string[]>(async (resolve, reject) => {
-      if (!currentAccount?.publicKey) {
-        reject(new Error('current account is not set'));
-        return;
-      }
+  async function getAccountInfo() {
+    if (!drive) return;
 
-      if (!drive) {
-        reject(new Error('drive not initialized'));
-        return;
-      }
-
-      const fileGroup = await drive
-        .listObjects(new PublicKey(currentAccount.publicKey))
-        .catch((err) => reject(err));
-
-      if (fileGroup) {
-        const sortedKeys = fileGroup?.keys?.sort();
-        setCurrentAccountFiles(sortedKeys);
-        resolve(sortedKeys);
-      }
-    });
+    return await drive.getStorageAccount(new PublicKey(currentAccount!.publicKey));
   }
 
-  const refreshFiles = async () => {
+  async function changeCurrentAccount(newAccount: PublicKey) {
     if (!drive) return;
-    if (currentAccount) {
-      const files = await drive.listObjects(new PublicKey(currentAccount.publicKey));
-      getAccountFiles(currentAccount, files);
-    }
-  };
 
+    const newCurrentAccount = accounts.find(
+      (a) => a.publicKey.toString() === newAccount.toString()
+    );
+
+    if (!newCurrentAccount) return;
+    // const newCurrentAccountFiles = accountFiles[newCurrentAccount.publicKey.toString()];
+    // @ts-ignore
+    setCurrentAccount(newCurrentAccount);
+  }
+
+  /* 
+    TODO: add pubkey param and get the storage information for each account
+  */
   async function refreshCurrentAccountInfo() {
     return new Promise<StorageAccountInfo>(async (resolve, reject) => {
       if (!currentAccount?.publicKey) {
@@ -224,7 +378,7 @@ export function GlobalProvider(props: any) {
     });
   }
 
-  async function createAccount(accountName: string, size: string) {
+  async function createAccount(accountName: string, size: string, immutable: boolean) {
     return new Promise<CreateStorageResponse>(async (resolve, reject) => {
       if (!accountName?.trim()) {
         reject(new Error('a name must be specified'));
@@ -242,17 +396,28 @@ export function GlobalProvider(props: any) {
 
       const newAcct = await drive
         .createStorageAccount(accountName, size, 'v2')
-        .catch((err) => reject(err));
+        .catch((err) => console.log(err));
 
       if (!newAcct) return;
 
+      const confirmedTransaction = await connection.confirmTransaction(
+        newAcct.transaction_signature,
+        'confirmed'
+      );
+
+      setProgressBar(0.5);
       try {
         const refreshedAccounts = await refreshAccounts();
 
-        const foundAccount = refreshedAccounts.find(
+        const foundAccount = refreshedAccounts?.find(
           (a) => a.publicKey.toString() === newAcct.shdw_bucket
         );
+
         if (foundAccount) selectAccount(foundAccount.publicKey);
+
+        if (immutable) {
+          await drive.makeStorageImmutable(new PublicKey(newAcct.shdw_bucket), 'v2');
+        }
       } catch (e) {
         console.log(e);
       }
@@ -262,13 +427,12 @@ export function GlobalProvider(props: any) {
   }
 
   const uploadFile = async (file: File | ShadowFile) => {
-    setLoading(true);
+    if (!drive) return;
+    if (!currentAccount) return;
 
     await drive?.uploadFile(currentAccount?.publicKey!, file);
 
-    await refreshFiles();
-
-    setLoading(false);
+    await getCurrentAccountFiles();
   };
 
   async function deleteCurrentAccount() {
@@ -380,14 +544,12 @@ export function GlobalProvider(props: any) {
       if (byteSize < currentAccountInfo.reserved_bytes) {
         const reductionSize = currentAccountInfo.reserved_bytes - byteSize;
         const reductionSizeUnited = byteSizeUnited(reductionSize);
-        console.log('ttt reducing drive size by ', reductionSizeUnited);
         response = await drive
           .reduceStorage(pubkey, reductionSizeUnited, 'v2')
           .catch((err) => reject(err));
       } else {
         const incrementSize = byteSize - currentAccountInfo.reserved_bytes;
         const incrementSizeUnited = byteSizeUnited(incrementSize);
-        console.log('ttt incrementing drive size by ', incrementSizeUnited);
         response = await drive
           .addStorage(pubkey, incrementSizeUnited, 'v2')
           .catch((err) => reject(err));
@@ -436,22 +598,36 @@ export function GlobalProvider(props: any) {
         accountFiles,
         loading,
         accounts,
+        filteredAccounts,
         currentAccount,
         currentAccountInfo,
+        fileMenuOpen,
         refreshBalances,
         refreshAccounts,
         currentAccountFiles,
         selectAccount,
         refreshCurrentAccountInfo,
-        refreshCurrentAccountFiles,
         refreshCurrentAccountData,
         createAccount,
         uploadFile,
         deleteCurrentAccount,
         undeleteCurrentAccount,
         resizeCurrentAccount,
-        refreshFiles,
         deleteCurrentAccountFile,
+        setFileMenu,
+        setFileMenuOpen,
+        currentFile,
+        changeCurrentAccount,
+        getAccountInfo,
+        getCurrentAccountFiles,
+        progressBar,
+        setProgressBar,
+        noAccounts,
+        localFiles,
+        setLocalFiles,
+        firstVisit,
+        setFirstVisit,
+        setVisited,
       }}>
       {props.children}
     </GlobalContext.Provider>
