@@ -15,6 +15,12 @@ const FileViewer = ({ file }: { file: FileInfo }) => {
     setSound(sound);
 
     await sound.playAsync();
+
+    // end sound
+    // await sound.unloadAsync();
+    setTimeout(() => {
+      sound.unloadAsync();
+    }, 1000);
   }
 
   useEffect(() => {

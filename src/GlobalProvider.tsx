@@ -133,15 +133,18 @@ export function GlobalProvider(props: any) {
   }, [wallet]);
 
   useEffect(() => {
-    refreshBalances().catch((err) => console.log(err.toString()));
+    if (connection) {
+      refreshBalances().catch((err) => console.log(err.toString()));
 
-    const timer = setInterval(() => {
-      refreshBalances();
-    }, 30000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+      const timer = setInterval(() => {
+        refreshBalances();
+      }, 3000);
+
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  }, [connection]);
 
   useEffect(() => {
     refreshAccounts().catch((err) => console.log(err.toString()));
@@ -235,12 +238,13 @@ export function GlobalProvider(props: any) {
     let solBalance = 0;
     let shdwBalance = 0;
     try {
-      solBalance = (await connection.getBalance(wallet)) / LAMPORTS_PER_SOL;
       const shdwTokenAccount = await getAssociatedTokenAddress(SHADOW_TOKEN_MINT, wallet, true);
       shdwBalance = (await connection.getTokenAccountBalance(shdwTokenAccount)).value.uiAmount!;
     } catch (e) {
-      console.log(e);
+      console.log('Error: Shadow token account (SHDW):', e);
     }
+    solBalance = (await connection.getBalance(wallet)) / LAMPORTS_PER_SOL;
+
     setSolBalance(solBalance);
     setShdwTokenAccount(shdwTokenAccount);
     setShdwBalance(shdwBalance);

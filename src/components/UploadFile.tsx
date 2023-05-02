@@ -25,6 +25,7 @@ const fileTypes = [
   'MP3',
   'MP4',
   'JPG',
+  'JPEG',
   'ZIP',
   'PHP',
   'CSS',
@@ -40,17 +41,12 @@ export const UploadFile = ({
   onEndUpload: any;
 }) => {
   const globalProvider = useContext(GlobalContext);
-  const [file, setFile] = useState(null);
-  const [progress, setProgress] = useState(0);
-
   const navigation = useNavigation();
 
   const handleChange = async (file: any) => {
     onBeginUpload();
     globalProvider.setProgressBar(0.25);
     navigation.setOptions({ headerRight: () => <HeaderRight title="Uploading..." /> });
-
-    setFile(file);
 
     await globalProvider.uploadFile(file);
     globalProvider.setProgressBar(0.75);

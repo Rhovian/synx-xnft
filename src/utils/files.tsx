@@ -18,8 +18,10 @@ export const fileTypes = [
   'quicktime',
   'javascript',
   'mp3',
+  'mpeg',
   'mp4',
   'jpg',
+  'jpeg',
   'zip',
   'php',
   'css',
@@ -35,15 +37,17 @@ const getFileTypeAndIcon = (mimeType: string) => {
 
   if (fileType === undefined) {
     fileType = 'unknown';
+  } else if (fileType === 'mp4') {
+    fileType = 'mov';
+  } else if (fileType === 'quicktime') {
+    fileType = 'mov';
+  } else if (fileType === 'mpeg') {
+    fileType = 'mp3';
+  } else if (fileType === 'jpeg') {
+    fileType = 'jpg';
   }
 
-  if (fileType === 'mp4') {
-    fileType = 'mov';
-  }
-
-  if (fileType === 'quicktime') {
-    fileType = 'mov';
-  }
+  console.log(mimeType, fileType);
 
   return fileType;
 };
