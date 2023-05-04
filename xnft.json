@@ -1,6 +1,6 @@
 {
   "name": "Synx Storage",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "storage": "aws",
   "description": "With the Synx xNFT, you can store your files, photos, videos, and other important documents securely on the blockchain via GenesysGo's Shadow Drive.",
   "website": "https://t.co/OEm0YB4p3K",

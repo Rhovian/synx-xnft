@@ -110,7 +110,7 @@ const FileViewer = ({ file }: { file: FileInfo }) => {
             rate={1.0}
             volume={1.0}
             isMuted={false}
-            resizeMode={ResizeMode.COVER}
+            resizeMode={ResizeMode.CONTAIN}
             shouldPlay
             useNativeControls
             style={styles.video}
@@ -148,11 +148,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   video: {
-    width: 300,
-    height: 300,
+    minWidth: 300,
+    minHeight: 300,
+    width: '80vw',
+    height: '50vh',
   },
   videoStyles: {
     width: '100%',
+    height: '100%',
   },
   image: {
     width: '100vw',
