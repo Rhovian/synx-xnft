@@ -1,6 +1,6 @@
 import { Video, Audio, ResizeMode } from 'expo-av';
 import React, { useState, useEffect } from 'react';
-import { Button, StyleSheet, Text, View, Image } from 'react-native';
+import { Button, StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 
 import { Colors } from '../constants';
 import { FileInfo } from '../models';
@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
   video: {
     minWidth: 300,
     minHeight: 300,
-    width: '80vw',
-    height: '50vh',
+    width: '90vw',
+    height: '80vh',
   },
   videoStyles: {
     width: '100%',

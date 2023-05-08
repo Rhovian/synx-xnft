@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     width: '100%',
+    height: '100%',
   },
   appTitle: {
     fontSize: 20,
@@ -104,6 +105,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexGrow: 1,
     width: '100%',
+    height: '100%',
     paddingHorizontal: 6,
     paddingVertical: 12,
   },
@@ -118,5 +120,8 @@ const styles = StyleSheet.create({
     padding: 13,
     backgroundColor: Colors.dark.inputBackground,
     borderRadius: 8,
+    maxWidth: 375,
+    maxHeight: 600,
+    marginBottom: 12,
   },
 });

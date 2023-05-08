@@ -40,29 +40,33 @@ export const Upload = () => {
   return (
     <Screen style={styles.container}>
       <Balance />
-      {loading ? (
-        <FullScreenLoadingIndicator />
-      ) : newUser ? (
-        showCreateVault ? (
-          <View style={styles.createVaultContainer}>
-            <CreateVault />
-          </View>
-        ) : (
-          <View style={styles.emptyFilesContainer}>
-            <EmptyFiles
-              showCreateVault={() => setShowCreateVault(true)}
-              goUpload={() => setNewUser(false)}
+      <View style={styles.uploadUpperContainer}>
+        <View style={styles.uploadContainer}>
+          {loading ? (
+            <FullScreenLoadingIndicator />
+          ) : newUser ? (
+            showCreateVault ? (
+              <View style={styles.createVaultContainer}>
+                <CreateVault />
+              </View>
+            ) : (
+              <View style={styles.emptyFilesContainer}>
+                <EmptyFiles
+                  showCreateVault={() => setShowCreateVault(true)}
+                  goUpload={() => setNewUser(false)}
+                />
+              </View>
+            )
+          ) : uploading ? (
+            <UploadPending />
+          ) : (
+            <UploadFile
+              onBeginUpload={() => setUploading(true)}
+              onEndUpload={() => setUploading(false)}
             />
-          </View>
-        )
-      ) : uploading ? (
-        <UploadPending />
-      ) : (
-        <UploadFile
-          onBeginUpload={() => setUploading(true)}
-          onEndUpload={() => setUploading(false)}
-        />
-      )}
+          )}
+        </View>
+      </View>
     </Screen>
   );
 };
@@ -70,6 +74,21 @@ export const Upload = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.background,
+    width: '100%',
+  },
+  uploadUpperContainer: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  uploadContainer: {
+    width: 375,
+    height: 600,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyFilesContainer: {
     marginTop: 20,

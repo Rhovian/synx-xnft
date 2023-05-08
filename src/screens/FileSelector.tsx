@@ -24,6 +24,17 @@ const FileSelector = () => {
     if (globalProvider.currentFile) {
       setFile(globalProvider.currentFile);
     }
+    /*
+    else {
+      setFile({
+        fileType: 'mp4',
+        name: 'test',
+        body: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        size: '100',
+        vault: 'personal',
+      });
+    }
+    */
   }, [globalProvider.currentFile]);
 
   return (

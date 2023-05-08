@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 6,
     width: '100%',
+    height: '100%',
   },
   appTitle: {
     fontSize: 20,
@@ -94,7 +95,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexGrow: 1,
     width: '100%',
+    height: '100%',
     paddingHorizontal: 6,
+    maxWidth: 375,
+    maxHeight: 600,
   },
   innerApp: {
     display: 'flex',
